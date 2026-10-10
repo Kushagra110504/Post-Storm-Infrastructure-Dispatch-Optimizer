@@ -1,0 +1,76 @@
+{
+  "places": [
+    {
+      "id": "mini_place_1",
+      "name": "SMS Hospital Jaipur",
+      "type": "hospital",
+      "lat": 26.9175,
+      "lon": 26.81,
+      "nearestNodeId": "mini_n_2_2",
+      "distanceToNode": 0
+    },
+    {
+      "id": "mini_place_2",
+      "name": "Santokba Durlabhji Memorial Hospital",
+      "type": "hospital",
+      "lat": 26.90875,
+      "lon": 26.825,
+      "nearestNodeId": "mini_n_1_5",
+      "distanceToNode": 0
+    },
+    {
+      "id": "mini_place_3",
+      "name": "Amanishah Pumping Station",
+      "type": "water_facility",
+      "lat": 26.9,
+      "lon": 26.805,
+      "nearestNodeId": "mini_n_0_1",
+      "distanceToNode": 0
+    },
+    {
+      "id": "mini_place_4",
+      "name": "Pink City Telecom Mast",
+      "type": "telecom_mast",
+      "lat": 26.935,
+      "lon": 26.82,
+      "nearestNodeId": "mini_n_4_4",
+      "distanceToNode": 0
+    },
+    {
+      "id": "mini_place_5",
+      "name": "Jaipur Central Police HQ",
+      "type": "police",
+      "lat": 26.92625,
+      "lon": 26.83,
+      "nearestNodeId": "mini_n_3_6",
+      "distanceToNode": 0
+    },
+    {
+      "id": "mini_place_6",
+      "name": "Jaipur Municipal Corporation (Town Hall)",
+      "type": "townhall",
+      "lat": 26.92625,
+      "lon": 26.805,
+      "nearestNodeId": "mini_n_3_1",
+      "distanceToNode": 0
+    },
+    {
+      "id": "mini_place_7",
+      "name": "Jal Mahal Grid Substation",
+      "type": "power_substation",
+      "lat": 26.935,
+      "lon": 26.835,
+      "nearestNodeId": "mini_n_4_7",
+      "distanceToNode": 0
+    },
+    {
+      "id": "mini_place_8",
+      "name": "Old City Fire HQ",
+      "type": "fire_station",
+      "lat": 26.9,
+      "lon": 26.83,
+      "nearestNodeId": "mini_n_0_6",
+      "distanceToNode": 0
+    }
+  ]
+}

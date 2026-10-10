@@ -1,2 +1,2 @@
-// Core graph definitions placeholder (populated in Phase 1 & 2)
-export {};
+export * from './haversine';
+export * from './projection';

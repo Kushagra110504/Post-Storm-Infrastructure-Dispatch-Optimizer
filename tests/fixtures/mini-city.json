@@ -1,0 +1,3244 @@
+{
+  "cityName": "Jaipur (Mini Test Grid)",
+  "bbox": {
+    "minLat": 26.9,
+    "minLon": 26.8,
+    "maxLat": 26.935,
+    "maxLon": 26.835,
+    "minX": 0,
+    "minY": 0,
+    "maxX": 3470.18,
+    "maxY": 3891.82
+  },
+  "nodes": {
+    "mini_n_0_0": {
+      "id": "mini_n_0_0",
+      "lat": 26.9,
+      "lon": 26.8,
+      "x": 0,
+      "y": 3891.82
+    },
+    "mini_n_0_1": {
+      "id": "mini_n_0_1",
+      "lat": 26.9,
+      "lon": 26.805,
+      "x": 495.74,
+      "y": 3891.82
+    },
+    "mini_n_0_2": {
+      "id": "mini_n_0_2",
+      "lat": 26.9,
+      "lon": 26.81,
+      "x": 991.48,
+      "y": 3891.82
+    },
+    "mini_n_0_3": {
+      "id": "mini_n_0_3",
+      "lat": 26.9,
+      "lon": 26.815,
+      "x": 1487.22,
+      "y": 3891.82
+    },
+    "mini_n_0_4": {
+      "id": "mini_n_0_4",
+      "lat": 26.9,
+      "lon": 26.82,
+      "x": 1982.96,
+      "y": 3891.82
+    },
+    "mini_n_0_5": {
+      "id": "mini_n_0_5",
+      "lat": 26.9,
+      "lon": 26.825,
+      "x": 2478.7,
+      "y": 3891.82
+    },
+    "mini_n_0_6": {
+      "id": "mini_n_0_6",
+      "lat": 26.9,
+      "lon": 26.83,
+      "x": 2974.44,
+      "y": 3891.82
+    },
+    "mini_n_0_7": {
+      "id": "mini_n_0_7",
+      "lat": 26.9,
+      "lon": 26.835,
+      "x": 3470.18,
+      "y": 3891.82
+    },
+    "mini_n_1_0": {
+      "id": "mini_n_1_0",
+      "lat": 26.90875,
+      "lon": 26.8,
+      "x": 0,
+      "y": 2918.87
+    },
+    "mini_n_1_1": {
+      "id": "mini_n_1_1",
+      "lat": 26.90875,
+      "lon": 26.805,
+      "x": 495.74,
+      "y": 2918.87
+    },
+    "mini_n_1_2": {
+      "id": "mini_n_1_2",
+      "lat": 26.90875,
+      "lon": 26.81,
+      "x": 991.48,
+      "y": 2918.87
+    },
+    "mini_n_1_3": {
+      "id": "mini_n_1_3",
+      "lat": 26.90875,
+      "lon": 26.815,
+      "x": 1487.22,
+      "y": 2918.87
+    },
+    "mini_n_1_4": {
+      "id": "mini_n_1_4",
+      "lat": 26.90875,
+      "lon": 26.82,
+      "x": 1982.96,
+      "y": 2918.87
+    },
+    "mini_n_1_5": {
+      "id": "mini_n_1_5",
+      "lat": 26.90875,
+      "lon": 26.825,
+      "x": 2478.7,
+      "y": 2918.87
+    },
+    "mini_n_1_6": {
+      "id": "mini_n_1_6",
+      "lat": 26.90875,
+      "lon": 26.83,
+      "x": 2974.44,
+      "y": 2918.87
+    },
+    "mini_n_1_7": {
+      "id": "mini_n_1_7",
+      "lat": 26.90875,
+      "lon": 26.835,
+      "x": 3470.18,
+      "y": 2918.87
+    },
+    "mini_n_2_0": {
+      "id": "mini_n_2_0",
+      "lat": 26.9175,
+      "lon": 26.8,
+      "x": 0,
+      "y": 1945.91
+    },
+    "mini_n_2_1": {
+      "id": "mini_n_2_1",
+      "lat": 26.9175,
+      "lon": 26.805,
+      "x": 495.74,
+      "y": 1945.91
+    },
+    "mini_n_2_2": {
+      "id": "mini_n_2_2",
+      "lat": 26.9175,
+      "lon": 26.81,
+      "x": 991.48,
+      "y": 1945.91
+    },
+    "mini_n_2_3": {
+      "id": "mini_n_2_3",
+      "lat": 26.9175,
+      "lon": 26.815,
+      "x": 1487.22,
+      "y": 1945.91
+    },
+    "mini_n_2_4": {
+      "id": "mini_n_2_4",
+      "lat": 26.9175,
+      "lon": 26.82,
+      "x": 1982.96,
+      "y": 1945.91
+    },
+    "mini_n_2_5": {
+      "id": "mini_n_2_5",
+      "lat": 26.9175,
+      "lon": 26.825,
+      "x": 2478.7,
+      "y": 1945.91
+    },
+    "mini_n_2_6": {
+      "id": "mini_n_2_6",
+      "lat": 26.9175,
+      "lon": 26.83,
+      "x": 2974.44,
+      "y": 1945.91
+    },
+    "mini_n_2_7": {
+      "id": "mini_n_2_7",
+      "lat": 26.9175,
+      "lon": 26.835,
+      "x": 3470.18,
+      "y": 1945.91
+    },
+    "mini_n_3_0": {
+      "id": "mini_n_3_0",
+      "lat": 26.92625,
+      "lon": 26.8,
+      "x": 0,
+      "y": 972.96
+    },
+    "mini_n_3_1": {
+      "id": "mini_n_3_1",
+      "lat": 26.92625,
+      "lon": 26.805,
+      "x": 495.74,
+      "y": 972.96
+    },
+    "mini_n_3_2": {
+      "id": "mini_n_3_2",
+      "lat": 26.92625,
+      "lon": 26.81,
+      "x": 991.48,
+      "y": 972.96
+    },
+    "mini_n_3_3": {
+      "id": "mini_n_3_3",
+      "lat": 26.92625,
+      "lon": 26.815,
+      "x": 1487.22,
+      "y": 972.96
+    },
+    "mini_n_3_4": {
+      "id": "mini_n_3_4",
+      "lat": 26.92625,
+      "lon": 26.82,
+      "x": 1982.96,
+      "y": 972.96
+    },
+    "mini_n_3_5": {
+      "id": "mini_n_3_5",
+      "lat": 26.92625,
+      "lon": 26.825,
+      "x": 2478.7,
+      "y": 972.96
+    },
+    "mini_n_3_6": {
+      "id": "mini_n_3_6",
+      "lat": 26.92625,
+      "lon": 26.83,
+      "x": 2974.44,
+      "y": 972.96
+    },
+    "mini_n_3_7": {
+      "id": "mini_n_3_7",
+      "lat": 26.92625,
+      "lon": 26.835,
+      "x": 3470.18,
+      "y": 972.96
+    },
+    "mini_n_4_0": {
+      "id": "mini_n_4_0",
+      "lat": 26.935,
+      "lon": 26.8,
+      "x": 0,
+      "y": 0
+    },
+    "mini_n_4_1": {
+      "id": "mini_n_4_1",
+      "lat": 26.935,
+      "lon": 26.805,
+      "x": 495.74,
+      "y": 0
+    },
+    "mini_n_4_2": {
+      "id": "mini_n_4_2",
+      "lat": 26.935,
+      "lon": 26.81,
+      "x": 991.48,
+      "y": 0
+    },
+    "mini_n_4_3": {
+      "id": "mini_n_4_3",
+      "lat": 26.935,
+      "lon": 26.815,
+      "x": 1487.22,
+      "y": 0
+    },
+    "mini_n_4_4": {
+      "id": "mini_n_4_4",
+      "lat": 26.935,
+      "lon": 26.82,
+      "x": 1982.96,
+      "y": 0
+    },
+    "mini_n_4_5": {
+      "id": "mini_n_4_5",
+      "lat": 26.935,
+      "lon": 26.825,
+      "x": 2478.7,
+      "y": 0
+    },
+    "mini_n_4_6": {
+      "id": "mini_n_4_6",
+      "lat": 26.935,
+      "lon": 26.83,
+      "x": 2974.44,
+      "y": 0
+    },
+    "mini_n_4_7": {
+      "id": "mini_n_4_7",
+      "lat": 26.935,
+      "lon": 26.835,
+      "x": 3470.18,
+      "y": 0
+    }
+  },
+  "edges": [
+    {
+      "id": "mini_e_1",
+      "from": "mini_n_0_0",
+      "to": "mini_n_0_1",
+      "length": 495.8,
+      "speed": 30,
+      "name": "MI Road",
+      "geometry": [
+        [
+          26.9,
+          26.8
+        ],
+        [
+          26.9,
+          26.8025
+        ],
+        [
+          26.9,
+          26.805
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_2",
+      "from": "mini_n_0_1",
+      "to": "mini_n_0_0",
+      "length": 495.8,
+      "speed": 30,
+      "name": "MI Road",
+      "geometry": [
+        [
+          26.9,
+          26.805
+        ],
+        [
+          26.9,
+          26.8025
+        ],
+        [
+          26.9,
+          26.8
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_3",
+      "from": "mini_n_0_1",
+      "to": "mini_n_0_2",
+      "length": 495.8,
+      "speed": 30,
+      "name": "MI Road",
+      "geometry": [
+        [
+          26.9,
+          26.805
+        ],
+        [
+          26.9,
+          26.8075
+        ],
+        [
+          26.9,
+          26.81
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_4",
+      "from": "mini_n_0_2",
+      "to": "mini_n_0_1",
+      "length": 495.8,
+      "speed": 30,
+      "name": "MI Road",
+      "geometry": [
+        [
+          26.9,
+          26.81
+        ],
+        [
+          26.9,
+          26.8075
+        ],
+        [
+          26.9,
+          26.805
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_5",
+      "from": "mini_n_0_2",
+      "to": "mini_n_0_3",
+      "length": 495.8,
+      "speed": 30,
+      "name": "MI Road",
+      "geometry": [
+        [
+          26.9,
+          26.81
+        ],
+        [
+          26.9,
+          26.8125
+        ],
+        [
+          26.9,
+          26.815
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_6",
+      "from": "mini_n_0_3",
+      "to": "mini_n_0_2",
+      "length": 495.8,
+      "speed": 30,
+      "name": "MI Road",
+      "geometry": [
+        [
+          26.9,
+          26.815
+        ],
+        [
+          26.9,
+          26.8125
+        ],
+        [
+          26.9,
+          26.81
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_7",
+      "from": "mini_n_0_3",
+      "to": "mini_n_0_4",
+      "length": 495.8,
+      "speed": 30,
+      "name": "MI Road",
+      "geometry": [
+        [
+          26.9,
+          26.815
+        ],
+        [
+          26.9,
+          26.8175
+        ],
+        [
+          26.9,
+          26.82
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_8",
+      "from": "mini_n_0_4",
+      "to": "mini_n_0_3",
+      "length": 495.8,
+      "speed": 30,
+      "name": "MI Road",
+      "geometry": [
+        [
+          26.9,
+          26.82
+        ],
+        [
+          26.9,
+          26.8175
+        ],
+        [
+          26.9,
+          26.815
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_9",
+      "from": "mini_n_0_4",
+      "to": "mini_n_0_5",
+      "length": 495.8,
+      "speed": 30,
+      "name": "MI Road",
+      "geometry": [
+        [
+          26.9,
+          26.82
+        ],
+        [
+          26.9,
+          26.8225
+        ],
+        [
+          26.9,
+          26.825
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_10",
+      "from": "mini_n_0_5",
+      "to": "mini_n_0_4",
+      "length": 495.8,
+      "speed": 30,
+      "name": "MI Road",
+      "geometry": [
+        [
+          26.9,
+          26.825
+        ],
+        [
+          26.9,
+          26.8225
+        ],
+        [
+          26.9,
+          26.82
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_11",
+      "from": "mini_n_0_5",
+      "to": "mini_n_0_6",
+      "length": 495.8,
+      "speed": 30,
+      "name": "MI Road",
+      "geometry": [
+        [
+          26.9,
+          26.825
+        ],
+        [
+          26.9,
+          26.8275
+        ],
+        [
+          26.9,
+          26.83
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_12",
+      "from": "mini_n_0_6",
+      "to": "mini_n_0_5",
+      "length": 495.8,
+      "speed": 30,
+      "name": "MI Road",
+      "geometry": [
+        [
+          26.9,
+          26.83
+        ],
+        [
+          26.9,
+          26.8275
+        ],
+        [
+          26.9,
+          26.825
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_13",
+      "from": "mini_n_0_6",
+      "to": "mini_n_0_7",
+      "length": 495.8,
+      "speed": 30,
+      "name": "MI Road",
+      "geometry": [
+        [
+          26.9,
+          26.83
+        ],
+        [
+          26.9,
+          26.8325
+        ],
+        [
+          26.9,
+          26.835
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_14",
+      "from": "mini_n_0_7",
+      "to": "mini_n_0_6",
+      "length": 495.8,
+      "speed": 30,
+      "name": "MI Road",
+      "geometry": [
+        [
+          26.9,
+          26.835
+        ],
+        [
+          26.9,
+          26.8325
+        ],
+        [
+          26.9,
+          26.83
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_15",
+      "from": "mini_n_1_0",
+      "to": "mini_n_1_1",
+      "length": 495.8,
+      "speed": 30,
+      "name": "Ashok Marg",
+      "geometry": [
+        [
+          26.90875,
+          26.8
+        ],
+        [
+          26.90875,
+          26.8025
+        ],
+        [
+          26.90875,
+          26.805
+        ]
+      ],
+      "oneway": true,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_16",
+      "from": "mini_n_1_1",
+      "to": "mini_n_1_2",
+      "length": 495.8,
+      "speed": 30,
+      "name": "Ashok Marg",
+      "geometry": [
+        [
+          26.90875,
+          26.805
+        ],
+        [
+          26.90875,
+          26.8075
+        ],
+        [
+          26.90875,
+          26.81
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_17",
+      "from": "mini_n_1_2",
+      "to": "mini_n_1_1",
+      "length": 495.8,
+      "speed": 30,
+      "name": "Ashok Marg",
+      "geometry": [
+        [
+          26.90875,
+          26.81
+        ],
+        [
+          26.90875,
+          26.8075
+        ],
+        [
+          26.90875,
+          26.805
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_18",
+      "from": "mini_n_1_2",
+      "to": "mini_n_1_3",
+      "length": 495.8,
+      "speed": 30,
+      "name": "Ashok Marg",
+      "geometry": [
+        [
+          26.90875,
+          26.81
+        ],
+        [
+          26.90875,
+          26.8125
+        ],
+        [
+          26.90875,
+          26.815
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_19",
+      "from": "mini_n_1_3",
+      "to": "mini_n_1_2",
+      "length": 495.8,
+      "speed": 30,
+      "name": "Ashok Marg",
+      "geometry": [
+        [
+          26.90875,
+          26.815
+        ],
+        [
+          26.90875,
+          26.8125
+        ],
+        [
+          26.90875,
+          26.81
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_20",
+      "from": "mini_n_1_3",
+      "to": "mini_n_1_4",
+      "length": 495.8,
+      "speed": 30,
+      "name": "Ashok Marg",
+      "geometry": [
+        [
+          26.90875,
+          26.815
+        ],
+        [
+          26.90875,
+          26.8175
+        ],
+        [
+          26.90875,
+          26.82
+        ]
+      ],
+      "oneway": true,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_21",
+      "from": "mini_n_1_4",
+      "to": "mini_n_1_5",
+      "length": 495.8,
+      "speed": 30,
+      "name": "Ashok Marg",
+      "geometry": [
+        [
+          26.90875,
+          26.82
+        ],
+        [
+          26.90875,
+          26.8225
+        ],
+        [
+          26.90875,
+          26.825
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_22",
+      "from": "mini_n_1_5",
+      "to": "mini_n_1_4",
+      "length": 495.8,
+      "speed": 30,
+      "name": "Ashok Marg",
+      "geometry": [
+        [
+          26.90875,
+          26.825
+        ],
+        [
+          26.90875,
+          26.8225
+        ],
+        [
+          26.90875,
+          26.82
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_23",
+      "from": "mini_n_1_5",
+      "to": "mini_n_1_6",
+      "length": 495.8,
+      "speed": 30,
+      "name": "Ashok Marg",
+      "geometry": [
+        [
+          26.90875,
+          26.825
+        ],
+        [
+          26.90875,
+          26.8275
+        ],
+        [
+          26.90875,
+          26.83
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_24",
+      "from": "mini_n_1_6",
+      "to": "mini_n_1_5",
+      "length": 495.8,
+      "speed": 30,
+      "name": "Ashok Marg",
+      "geometry": [
+        [
+          26.90875,
+          26.83
+        ],
+        [
+          26.90875,
+          26.8275
+        ],
+        [
+          26.90875,
+          26.825
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_25",
+      "from": "mini_n_1_6",
+      "to": "mini_n_1_7",
+      "length": 495.8,
+      "speed": 30,
+      "name": "Ashok Marg",
+      "geometry": [
+        [
+          26.90875,
+          26.83
+        ],
+        [
+          26.90875,
+          26.8325
+        ],
+        [
+          26.90875,
+          26.835
+        ]
+      ],
+      "oneway": true,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_26",
+      "from": "mini_n_2_0",
+      "to": "mini_n_2_1",
+      "length": 495.7,
+      "speed": 30,
+      "name": "Tripolia Bazaar",
+      "geometry": [
+        [
+          26.9175,
+          26.8
+        ],
+        [
+          26.9175,
+          26.8025
+        ],
+        [
+          26.9175,
+          26.805
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_27",
+      "from": "mini_n_2_1",
+      "to": "mini_n_2_0",
+      "length": 495.7,
+      "speed": 30,
+      "name": "Tripolia Bazaar",
+      "geometry": [
+        [
+          26.9175,
+          26.805
+        ],
+        [
+          26.9175,
+          26.8025
+        ],
+        [
+          26.9175,
+          26.8
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_28",
+      "from": "mini_n_2_1",
+      "to": "mini_n_2_2",
+      "length": 495.7,
+      "speed": 30,
+      "name": "Tripolia Bazaar",
+      "geometry": [
+        [
+          26.9175,
+          26.805
+        ],
+        [
+          26.9175,
+          26.8075
+        ],
+        [
+          26.9175,
+          26.81
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_29",
+      "from": "mini_n_2_2",
+      "to": "mini_n_2_1",
+      "length": 495.7,
+      "speed": 30,
+      "name": "Tripolia Bazaar",
+      "geometry": [
+        [
+          26.9175,
+          26.81
+        ],
+        [
+          26.9175,
+          26.8075
+        ],
+        [
+          26.9175,
+          26.805
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_30",
+      "from": "mini_n_2_2",
+      "to": "mini_n_2_3",
+      "length": 495.7,
+      "speed": 30,
+      "name": "Tripolia Bazaar",
+      "geometry": [
+        [
+          26.9175,
+          26.81
+        ],
+        [
+          26.9175,
+          26.8125
+        ],
+        [
+          26.9175,
+          26.815
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_31",
+      "from": "mini_n_2_3",
+      "to": "mini_n_2_2",
+      "length": 495.7,
+      "speed": 30,
+      "name": "Tripolia Bazaar",
+      "geometry": [
+        [
+          26.9175,
+          26.815
+        ],
+        [
+          26.9175,
+          26.8125
+        ],
+        [
+          26.9175,
+          26.81
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_32",
+      "from": "mini_n_2_3",
+      "to": "mini_n_2_4",
+      "length": 495.7,
+      "speed": 30,
+      "name": "Tripolia Bazaar",
+      "geometry": [
+        [
+          26.9175,
+          26.815
+        ],
+        [
+          26.9175,
+          26.8175
+        ],
+        [
+          26.9175,
+          26.82
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_33",
+      "from": "mini_n_2_4",
+      "to": "mini_n_2_3",
+      "length": 495.7,
+      "speed": 30,
+      "name": "Tripolia Bazaar",
+      "geometry": [
+        [
+          26.9175,
+          26.82
+        ],
+        [
+          26.9175,
+          26.8175
+        ],
+        [
+          26.9175,
+          26.815
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_34",
+      "from": "mini_n_2_4",
+      "to": "mini_n_2_5",
+      "length": 495.7,
+      "speed": 30,
+      "name": "Tripolia Bazaar",
+      "geometry": [
+        [
+          26.9175,
+          26.82
+        ],
+        [
+          26.9175,
+          26.8225
+        ],
+        [
+          26.9175,
+          26.825
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_35",
+      "from": "mini_n_2_5",
+      "to": "mini_n_2_4",
+      "length": 495.7,
+      "speed": 30,
+      "name": "Tripolia Bazaar",
+      "geometry": [
+        [
+          26.9175,
+          26.825
+        ],
+        [
+          26.9175,
+          26.8225
+        ],
+        [
+          26.9175,
+          26.82
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_36",
+      "from": "mini_n_2_5",
+      "to": "mini_n_2_6",
+      "length": 495.7,
+      "speed": 30,
+      "name": "Tripolia Bazaar",
+      "geometry": [
+        [
+          26.9175,
+          26.825
+        ],
+        [
+          26.9175,
+          26.8275
+        ],
+        [
+          26.9175,
+          26.83
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_37",
+      "from": "mini_n_2_6",
+      "to": "mini_n_2_5",
+      "length": 495.7,
+      "speed": 30,
+      "name": "Tripolia Bazaar",
+      "geometry": [
+        [
+          26.9175,
+          26.83
+        ],
+        [
+          26.9175,
+          26.8275
+        ],
+        [
+          26.9175,
+          26.825
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_38",
+      "from": "mini_n_2_6",
+      "to": "mini_n_2_7",
+      "length": 495.7,
+      "speed": 30,
+      "name": "Tripolia Bazaar",
+      "geometry": [
+        [
+          26.9175,
+          26.83
+        ],
+        [
+          26.9175,
+          26.8325
+        ],
+        [
+          26.9175,
+          26.835
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_39",
+      "from": "mini_n_2_7",
+      "to": "mini_n_2_6",
+      "length": 495.7,
+      "speed": 30,
+      "name": "Tripolia Bazaar",
+      "geometry": [
+        [
+          26.9175,
+          26.835
+        ],
+        [
+          26.9175,
+          26.8325
+        ],
+        [
+          26.9175,
+          26.83
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_40",
+      "from": "mini_n_3_0",
+      "to": "mini_n_3_1",
+      "length": 495.7,
+      "speed": 30,
+      "name": "Chandpole Bazaar",
+      "geometry": [
+        [
+          26.92625,
+          26.8
+        ],
+        [
+          26.92625,
+          26.8025
+        ],
+        [
+          26.92625,
+          26.805
+        ]
+      ],
+      "oneway": true,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_41",
+      "from": "mini_n_3_1",
+      "to": "mini_n_3_2",
+      "length": 495.7,
+      "speed": 30,
+      "name": "Chandpole Bazaar",
+      "geometry": [
+        [
+          26.92625,
+          26.805
+        ],
+        [
+          26.92625,
+          26.8075
+        ],
+        [
+          26.92625,
+          26.81
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_42",
+      "from": "mini_n_3_2",
+      "to": "mini_n_3_1",
+      "length": 495.7,
+      "speed": 30,
+      "name": "Chandpole Bazaar",
+      "geometry": [
+        [
+          26.92625,
+          26.81
+        ],
+        [
+          26.92625,
+          26.8075
+        ],
+        [
+          26.92625,
+          26.805
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_43",
+      "from": "mini_n_3_2",
+      "to": "mini_n_3_3",
+      "length": 495.7,
+      "speed": 30,
+      "name": "Chandpole Bazaar",
+      "geometry": [
+        [
+          26.92625,
+          26.81
+        ],
+        [
+          26.92625,
+          26.8125
+        ],
+        [
+          26.92625,
+          26.815
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_44",
+      "from": "mini_n_3_3",
+      "to": "mini_n_3_2",
+      "length": 495.7,
+      "speed": 30,
+      "name": "Chandpole Bazaar",
+      "geometry": [
+        [
+          26.92625,
+          26.815
+        ],
+        [
+          26.92625,
+          26.8125
+        ],
+        [
+          26.92625,
+          26.81
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_45",
+      "from": "mini_n_3_3",
+      "to": "mini_n_3_4",
+      "length": 495.7,
+      "speed": 30,
+      "name": "Chandpole Bazaar",
+      "geometry": [
+        [
+          26.92625,
+          26.815
+        ],
+        [
+          26.92625,
+          26.8175
+        ],
+        [
+          26.92625,
+          26.82
+        ]
+      ],
+      "oneway": true,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_46",
+      "from": "mini_n_3_4",
+      "to": "mini_n_3_5",
+      "length": 495.7,
+      "speed": 30,
+      "name": "Chandpole Bazaar",
+      "geometry": [
+        [
+          26.92625,
+          26.82
+        ],
+        [
+          26.92625,
+          26.8225
+        ],
+        [
+          26.92625,
+          26.825
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_47",
+      "from": "mini_n_3_5",
+      "to": "mini_n_3_4",
+      "length": 495.7,
+      "speed": 30,
+      "name": "Chandpole Bazaar",
+      "geometry": [
+        [
+          26.92625,
+          26.825
+        ],
+        [
+          26.92625,
+          26.8225
+        ],
+        [
+          26.92625,
+          26.82
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_48",
+      "from": "mini_n_3_5",
+      "to": "mini_n_3_6",
+      "length": 495.7,
+      "speed": 30,
+      "name": "Chandpole Bazaar",
+      "geometry": [
+        [
+          26.92625,
+          26.825
+        ],
+        [
+          26.92625,
+          26.8275
+        ],
+        [
+          26.92625,
+          26.83
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_49",
+      "from": "mini_n_3_6",
+      "to": "mini_n_3_5",
+      "length": 495.7,
+      "speed": 30,
+      "name": "Chandpole Bazaar",
+      "geometry": [
+        [
+          26.92625,
+          26.83
+        ],
+        [
+          26.92625,
+          26.8275
+        ],
+        [
+          26.92625,
+          26.825
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_50",
+      "from": "mini_n_3_6",
+      "to": "mini_n_3_7",
+      "length": 495.7,
+      "speed": 30,
+      "name": "Chandpole Bazaar",
+      "geometry": [
+        [
+          26.92625,
+          26.83
+        ],
+        [
+          26.92625,
+          26.8325
+        ],
+        [
+          26.92625,
+          26.835
+        ]
+      ],
+      "oneway": true,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_51",
+      "from": "mini_n_4_0",
+      "to": "mini_n_4_1",
+      "length": 495.7,
+      "speed": 30,
+      "name": "Prithviraj Road",
+      "geometry": [
+        [
+          26.935,
+          26.8
+        ],
+        [
+          26.935,
+          26.8025
+        ],
+        [
+          26.935,
+          26.805
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_52",
+      "from": "mini_n_4_1",
+      "to": "mini_n_4_0",
+      "length": 495.7,
+      "speed": 30,
+      "name": "Prithviraj Road",
+      "geometry": [
+        [
+          26.935,
+          26.805
+        ],
+        [
+          26.935,
+          26.8025
+        ],
+        [
+          26.935,
+          26.8
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_53",
+      "from": "mini_n_4_1",
+      "to": "mini_n_4_2",
+      "length": 495.7,
+      "speed": 30,
+      "name": "Prithviraj Road",
+      "geometry": [
+        [
+          26.935,
+          26.805
+        ],
+        [
+          26.935,
+          26.8075
+        ],
+        [
+          26.935,
+          26.81
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_54",
+      "from": "mini_n_4_2",
+      "to": "mini_n_4_1",
+      "length": 495.7,
+      "speed": 30,
+      "name": "Prithviraj Road",
+      "geometry": [
+        [
+          26.935,
+          26.81
+        ],
+        [
+          26.935,
+          26.8075
+        ],
+        [
+          26.935,
+          26.805
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_55",
+      "from": "mini_n_4_2",
+      "to": "mini_n_4_3",
+      "length": 495.7,
+      "speed": 30,
+      "name": "Prithviraj Road",
+      "geometry": [
+        [
+          26.935,
+          26.81
+        ],
+        [
+          26.935,
+          26.8125
+        ],
+        [
+          26.935,
+          26.815
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_56",
+      "from": "mini_n_4_3",
+      "to": "mini_n_4_2",
+      "length": 495.7,
+      "speed": 30,
+      "name": "Prithviraj Road",
+      "geometry": [
+        [
+          26.935,
+          26.815
+        ],
+        [
+          26.935,
+          26.8125
+        ],
+        [
+          26.935,
+          26.81
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_57",
+      "from": "mini_n_4_3",
+      "to": "mini_n_4_4",
+      "length": 495.7,
+      "speed": 30,
+      "name": "Prithviraj Road",
+      "geometry": [
+        [
+          26.935,
+          26.815
+        ],
+        [
+          26.935,
+          26.8175
+        ],
+        [
+          26.935,
+          26.82
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_58",
+      "from": "mini_n_4_4",
+      "to": "mini_n_4_3",
+      "length": 495.7,
+      "speed": 30,
+      "name": "Prithviraj Road",
+      "geometry": [
+        [
+          26.935,
+          26.82
+        ],
+        [
+          26.935,
+          26.8175
+        ],
+        [
+          26.935,
+          26.815
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_59",
+      "from": "mini_n_4_4",
+      "to": "mini_n_4_5",
+      "length": 495.7,
+      "speed": 30,
+      "name": "Prithviraj Road",
+      "geometry": [
+        [
+          26.935,
+          26.82
+        ],
+        [
+          26.935,
+          26.8225
+        ],
+        [
+          26.935,
+          26.825
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_60",
+      "from": "mini_n_4_5",
+      "to": "mini_n_4_4",
+      "length": 495.7,
+      "speed": 30,
+      "name": "Prithviraj Road",
+      "geometry": [
+        [
+          26.935,
+          26.825
+        ],
+        [
+          26.935,
+          26.8225
+        ],
+        [
+          26.935,
+          26.82
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_61",
+      "from": "mini_n_4_5",
+      "to": "mini_n_4_6",
+      "length": 495.7,
+      "speed": 30,
+      "name": "Prithviraj Road",
+      "geometry": [
+        [
+          26.935,
+          26.825
+        ],
+        [
+          26.935,
+          26.8275
+        ],
+        [
+          26.935,
+          26.83
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_62",
+      "from": "mini_n_4_6",
+      "to": "mini_n_4_5",
+      "length": 495.7,
+      "speed": 30,
+      "name": "Prithviraj Road",
+      "geometry": [
+        [
+          26.935,
+          26.83
+        ],
+        [
+          26.935,
+          26.8275
+        ],
+        [
+          26.935,
+          26.825
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_63",
+      "from": "mini_n_4_6",
+      "to": "mini_n_4_7",
+      "length": 495.7,
+      "speed": 30,
+      "name": "Prithviraj Road",
+      "geometry": [
+        [
+          26.935,
+          26.83
+        ],
+        [
+          26.935,
+          26.8325
+        ],
+        [
+          26.935,
+          26.835
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_64",
+      "from": "mini_n_4_7",
+      "to": "mini_n_4_6",
+      "length": 495.7,
+      "speed": 30,
+      "name": "Prithviraj Road",
+      "geometry": [
+        [
+          26.935,
+          26.835
+        ],
+        [
+          26.935,
+          26.8325
+        ],
+        [
+          26.935,
+          26.83
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "secondary"
+    },
+    {
+      "id": "mini_e_65",
+      "from": "mini_n_0_0",
+      "to": "mini_n_1_0",
+      "length": 973,
+      "speed": 40,
+      "name": "JLN Marg",
+      "geometry": [
+        [
+          26.9,
+          26.8
+        ],
+        [
+          26.90875,
+          26.8
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_66",
+      "from": "mini_n_1_0",
+      "to": "mini_n_0_0",
+      "length": 973,
+      "speed": 40,
+      "name": "JLN Marg",
+      "geometry": [
+        [
+          26.90875,
+          26.8
+        ],
+        [
+          26.9,
+          26.8
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_67",
+      "from": "mini_n_1_0",
+      "to": "mini_n_2_0",
+      "length": 973,
+      "speed": 40,
+      "name": "JLN Marg",
+      "geometry": [
+        [
+          26.90875,
+          26.8
+        ],
+        [
+          26.9175,
+          26.8
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_68",
+      "from": "mini_n_2_0",
+      "to": "mini_n_1_0",
+      "length": 973,
+      "speed": 40,
+      "name": "JLN Marg",
+      "geometry": [
+        [
+          26.9175,
+          26.8
+        ],
+        [
+          26.90875,
+          26.8
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_69",
+      "from": "mini_n_2_0",
+      "to": "mini_n_3_0",
+      "length": 973,
+      "speed": 40,
+      "name": "JLN Marg",
+      "geometry": [
+        [
+          26.9175,
+          26.8
+        ],
+        [
+          26.92625,
+          26.8
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_70",
+      "from": "mini_n_3_0",
+      "to": "mini_n_2_0",
+      "length": 973,
+      "speed": 40,
+      "name": "JLN Marg",
+      "geometry": [
+        [
+          26.92625,
+          26.8
+        ],
+        [
+          26.9175,
+          26.8
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_71",
+      "from": "mini_n_3_0",
+      "to": "mini_n_4_0",
+      "length": 973,
+      "speed": 40,
+      "name": "JLN Marg",
+      "geometry": [
+        [
+          26.92625,
+          26.8
+        ],
+        [
+          26.935,
+          26.8
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_72",
+      "from": "mini_n_4_0",
+      "to": "mini_n_3_0",
+      "length": 973,
+      "speed": 40,
+      "name": "JLN Marg",
+      "geometry": [
+        [
+          26.935,
+          26.8
+        ],
+        [
+          26.92625,
+          26.8
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_73",
+      "from": "mini_n_0_1",
+      "to": "mini_n_1_1",
+      "length": 973,
+      "speed": 40,
+      "name": "Tonk Road",
+      "geometry": [
+        [
+          26.9,
+          26.805
+        ],
+        [
+          26.90875,
+          26.805
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_74",
+      "from": "mini_n_1_1",
+      "to": "mini_n_0_1",
+      "length": 973,
+      "speed": 40,
+      "name": "Tonk Road",
+      "geometry": [
+        [
+          26.90875,
+          26.805
+        ],
+        [
+          26.9,
+          26.805
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_75",
+      "from": "mini_n_1_1",
+      "to": "mini_n_2_1",
+      "length": 973,
+      "speed": 40,
+      "name": "Tonk Road",
+      "geometry": [
+        [
+          26.90875,
+          26.805
+        ],
+        [
+          26.9175,
+          26.805
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_76",
+      "from": "mini_n_2_1",
+      "to": "mini_n_1_1",
+      "length": 973,
+      "speed": 40,
+      "name": "Tonk Road",
+      "geometry": [
+        [
+          26.9175,
+          26.805
+        ],
+        [
+          26.90875,
+          26.805
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_77",
+      "from": "mini_n_2_1",
+      "to": "mini_n_3_1",
+      "length": 973,
+      "speed": 40,
+      "name": "Tonk Road",
+      "geometry": [
+        [
+          26.9175,
+          26.805
+        ],
+        [
+          26.92625,
+          26.805
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_78",
+      "from": "mini_n_3_1",
+      "to": "mini_n_2_1",
+      "length": 973,
+      "speed": 40,
+      "name": "Tonk Road",
+      "geometry": [
+        [
+          26.92625,
+          26.805
+        ],
+        [
+          26.9175,
+          26.805
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_79",
+      "from": "mini_n_3_1",
+      "to": "mini_n_4_1",
+      "length": 973,
+      "speed": 40,
+      "name": "Tonk Road",
+      "geometry": [
+        [
+          26.92625,
+          26.805
+        ],
+        [
+          26.935,
+          26.805
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_80",
+      "from": "mini_n_4_1",
+      "to": "mini_n_3_1",
+      "length": 973,
+      "speed": 40,
+      "name": "Tonk Road",
+      "geometry": [
+        [
+          26.935,
+          26.805
+        ],
+        [
+          26.92625,
+          26.805
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_81",
+      "from": "mini_n_0_2",
+      "to": "mini_n_1_2",
+      "length": 973,
+      "speed": 40,
+      "name": "Sansar Chandra Road",
+      "geometry": [
+        [
+          26.9,
+          26.81
+        ],
+        [
+          26.90875,
+          26.81
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_82",
+      "from": "mini_n_1_2",
+      "to": "mini_n_0_2",
+      "length": 973,
+      "speed": 40,
+      "name": "Sansar Chandra Road",
+      "geometry": [
+        [
+          26.90875,
+          26.81
+        ],
+        [
+          26.9,
+          26.81
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_83",
+      "from": "mini_n_1_2",
+      "to": "mini_n_2_2",
+      "length": 973,
+      "speed": 40,
+      "name": "Sansar Chandra Road",
+      "geometry": [
+        [
+          26.90875,
+          26.81
+        ],
+        [
+          26.9175,
+          26.81
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_84",
+      "from": "mini_n_2_2",
+      "to": "mini_n_1_2",
+      "length": 973,
+      "speed": 40,
+      "name": "Sansar Chandra Road",
+      "geometry": [
+        [
+          26.9175,
+          26.81
+        ],
+        [
+          26.90875,
+          26.81
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_85",
+      "from": "mini_n_2_2",
+      "to": "mini_n_3_2",
+      "length": 973,
+      "speed": 40,
+      "name": "Sansar Chandra Road",
+      "geometry": [
+        [
+          26.9175,
+          26.81
+        ],
+        [
+          26.92625,
+          26.81
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_86",
+      "from": "mini_n_3_2",
+      "to": "mini_n_2_2",
+      "length": 973,
+      "speed": 40,
+      "name": "Sansar Chandra Road",
+      "geometry": [
+        [
+          26.92625,
+          26.81
+        ],
+        [
+          26.9175,
+          26.81
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_87",
+      "from": "mini_n_3_2",
+      "to": "mini_n_4_2",
+      "length": 973,
+      "speed": 40,
+      "name": "Sansar Chandra Road",
+      "geometry": [
+        [
+          26.92625,
+          26.81
+        ],
+        [
+          26.935,
+          26.81
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_88",
+      "from": "mini_n_4_2",
+      "to": "mini_n_3_2",
+      "length": 973,
+      "speed": 40,
+      "name": "Sansar Chandra Road",
+      "geometry": [
+        [
+          26.935,
+          26.81
+        ],
+        [
+          26.92625,
+          26.81
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_89",
+      "from": "mini_n_0_3",
+      "to": "mini_n_1_3",
+      "length": 973,
+      "speed": 40,
+      "name": "Mirza Ismail Link",
+      "geometry": [
+        [
+          26.9,
+          26.815
+        ],
+        [
+          26.90875,
+          26.815
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_90",
+      "from": "mini_n_1_3",
+      "to": "mini_n_0_3",
+      "length": 973,
+      "speed": 40,
+      "name": "Mirza Ismail Link",
+      "geometry": [
+        [
+          26.90875,
+          26.815
+        ],
+        [
+          26.9,
+          26.815
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_91",
+      "from": "mini_n_1_3",
+      "to": "mini_n_2_3",
+      "length": 973,
+      "speed": 40,
+      "name": "Mirza Ismail Link",
+      "geometry": [
+        [
+          26.90875,
+          26.815
+        ],
+        [
+          26.9175,
+          26.815
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_92",
+      "from": "mini_n_2_3",
+      "to": "mini_n_1_3",
+      "length": 973,
+      "speed": 40,
+      "name": "Mirza Ismail Link",
+      "geometry": [
+        [
+          26.9175,
+          26.815
+        ],
+        [
+          26.90875,
+          26.815
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_93",
+      "from": "mini_n_2_3",
+      "to": "mini_n_3_3",
+      "length": 973,
+      "speed": 40,
+      "name": "Mirza Ismail Link",
+      "geometry": [
+        [
+          26.9175,
+          26.815
+        ],
+        [
+          26.92625,
+          26.815
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary",
+      "bridge": true
+    },
+    {
+      "id": "mini_e_94",
+      "from": "mini_n_3_3",
+      "to": "mini_n_2_3",
+      "length": 973,
+      "speed": 40,
+      "name": "Mirza Ismail Link",
+      "geometry": [
+        [
+          26.92625,
+          26.815
+        ],
+        [
+          26.9175,
+          26.815
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary",
+      "bridge": true
+    },
+    {
+      "id": "mini_e_95",
+      "from": "mini_n_3_3",
+      "to": "mini_n_4_3",
+      "length": 973,
+      "speed": 40,
+      "name": "Mirza Ismail Link",
+      "geometry": [
+        [
+          26.92625,
+          26.815
+        ],
+        [
+          26.935,
+          26.815
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_96",
+      "from": "mini_n_4_3",
+      "to": "mini_n_3_3",
+      "length": 973,
+      "speed": 40,
+      "name": "Mirza Ismail Link",
+      "geometry": [
+        [
+          26.935,
+          26.815
+        ],
+        [
+          26.92625,
+          26.815
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_97",
+      "from": "mini_n_0_4",
+      "to": "mini_n_1_4",
+      "length": 973,
+      "speed": 40,
+      "name": "Johari Bazaar Road",
+      "geometry": [
+        [
+          26.9,
+          26.82
+        ],
+        [
+          26.90875,
+          26.82
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_98",
+      "from": "mini_n_1_4",
+      "to": "mini_n_0_4",
+      "length": 973,
+      "speed": 40,
+      "name": "Johari Bazaar Road",
+      "geometry": [
+        [
+          26.90875,
+          26.82
+        ],
+        [
+          26.9,
+          26.82
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_99",
+      "from": "mini_n_1_4",
+      "to": "mini_n_2_4",
+      "length": 973,
+      "speed": 40,
+      "name": "Johari Bazaar Road",
+      "geometry": [
+        [
+          26.90875,
+          26.82
+        ],
+        [
+          26.9175,
+          26.82
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_100",
+      "from": "mini_n_2_4",
+      "to": "mini_n_1_4",
+      "length": 973,
+      "speed": 40,
+      "name": "Johari Bazaar Road",
+      "geometry": [
+        [
+          26.9175,
+          26.82
+        ],
+        [
+          26.90875,
+          26.82
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_101",
+      "from": "mini_n_2_4",
+      "to": "mini_n_3_4",
+      "length": 973,
+      "speed": 40,
+      "name": "Johari Bazaar Road",
+      "geometry": [
+        [
+          26.9175,
+          26.82
+        ],
+        [
+          26.92625,
+          26.82
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_102",
+      "from": "mini_n_3_4",
+      "to": "mini_n_2_4",
+      "length": 973,
+      "speed": 40,
+      "name": "Johari Bazaar Road",
+      "geometry": [
+        [
+          26.92625,
+          26.82
+        ],
+        [
+          26.9175,
+          26.82
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_103",
+      "from": "mini_n_3_4",
+      "to": "mini_n_4_4",
+      "length": 973,
+      "speed": 40,
+      "name": "Johari Bazaar Road",
+      "geometry": [
+        [
+          26.92625,
+          26.82
+        ],
+        [
+          26.935,
+          26.82
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_104",
+      "from": "mini_n_4_4",
+      "to": "mini_n_3_4",
+      "length": 973,
+      "speed": 40,
+      "name": "Johari Bazaar Road",
+      "geometry": [
+        [
+          26.935,
+          26.82
+        ],
+        [
+          26.92625,
+          26.82
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_105",
+      "from": "mini_n_0_5",
+      "to": "mini_n_1_5",
+      "length": 973,
+      "speed": 40,
+      "name": "Kishanpole Bazaar Road",
+      "geometry": [
+        [
+          26.9,
+          26.825
+        ],
+        [
+          26.90875,
+          26.825
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_106",
+      "from": "mini_n_1_5",
+      "to": "mini_n_0_5",
+      "length": 973,
+      "speed": 40,
+      "name": "Kishanpole Bazaar Road",
+      "geometry": [
+        [
+          26.90875,
+          26.825
+        ],
+        [
+          26.9,
+          26.825
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_107",
+      "from": "mini_n_1_5",
+      "to": "mini_n_2_5",
+      "length": 973,
+      "speed": 40,
+      "name": "Kishanpole Bazaar Road",
+      "geometry": [
+        [
+          26.90875,
+          26.825
+        ],
+        [
+          26.9175,
+          26.825
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_108",
+      "from": "mini_n_2_5",
+      "to": "mini_n_1_5",
+      "length": 973,
+      "speed": 40,
+      "name": "Kishanpole Bazaar Road",
+      "geometry": [
+        [
+          26.9175,
+          26.825
+        ],
+        [
+          26.90875,
+          26.825
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_109",
+      "from": "mini_n_2_5",
+      "to": "mini_n_3_5",
+      "length": 973,
+      "speed": 40,
+      "name": "Kishanpole Bazaar Road",
+      "geometry": [
+        [
+          26.9175,
+          26.825
+        ],
+        [
+          26.92625,
+          26.825
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_110",
+      "from": "mini_n_3_5",
+      "to": "mini_n_2_5",
+      "length": 973,
+      "speed": 40,
+      "name": "Kishanpole Bazaar Road",
+      "geometry": [
+        [
+          26.92625,
+          26.825
+        ],
+        [
+          26.9175,
+          26.825
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_111",
+      "from": "mini_n_3_5",
+      "to": "mini_n_4_5",
+      "length": 973,
+      "speed": 40,
+      "name": "Kishanpole Bazaar Road",
+      "geometry": [
+        [
+          26.92625,
+          26.825
+        ],
+        [
+          26.935,
+          26.825
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_112",
+      "from": "mini_n_4_5",
+      "to": "mini_n_3_5",
+      "length": 973,
+      "speed": 40,
+      "name": "Kishanpole Bazaar Road",
+      "geometry": [
+        [
+          26.935,
+          26.825
+        ],
+        [
+          26.92625,
+          26.825
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_113",
+      "from": "mini_n_0_6",
+      "to": "mini_n_1_6",
+      "length": 973,
+      "speed": 40,
+      "name": "Chaura Rasta",
+      "geometry": [
+        [
+          26.9,
+          26.83
+        ],
+        [
+          26.90875,
+          26.83
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_114",
+      "from": "mini_n_1_6",
+      "to": "mini_n_0_6",
+      "length": 973,
+      "speed": 40,
+      "name": "Chaura Rasta",
+      "geometry": [
+        [
+          26.90875,
+          26.83
+        ],
+        [
+          26.9,
+          26.83
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_115",
+      "from": "mini_n_1_6",
+      "to": "mini_n_2_6",
+      "length": 973,
+      "speed": 40,
+      "name": "Chaura Rasta",
+      "geometry": [
+        [
+          26.90875,
+          26.83
+        ],
+        [
+          26.9175,
+          26.83
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_116",
+      "from": "mini_n_2_6",
+      "to": "mini_n_1_6",
+      "length": 973,
+      "speed": 40,
+      "name": "Chaura Rasta",
+      "geometry": [
+        [
+          26.9175,
+          26.83
+        ],
+        [
+          26.90875,
+          26.83
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_117",
+      "from": "mini_n_2_6",
+      "to": "mini_n_3_6",
+      "length": 973,
+      "speed": 40,
+      "name": "Chaura Rasta",
+      "geometry": [
+        [
+          26.9175,
+          26.83
+        ],
+        [
+          26.92625,
+          26.83
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_118",
+      "from": "mini_n_3_6",
+      "to": "mini_n_2_6",
+      "length": 973,
+      "speed": 40,
+      "name": "Chaura Rasta",
+      "geometry": [
+        [
+          26.92625,
+          26.83
+        ],
+        [
+          26.9175,
+          26.83
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_119",
+      "from": "mini_n_3_6",
+      "to": "mini_n_4_6",
+      "length": 973,
+      "speed": 40,
+      "name": "Chaura Rasta",
+      "geometry": [
+        [
+          26.92625,
+          26.83
+        ],
+        [
+          26.935,
+          26.83
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_120",
+      "from": "mini_n_4_6",
+      "to": "mini_n_3_6",
+      "length": 973,
+      "speed": 40,
+      "name": "Chaura Rasta",
+      "geometry": [
+        [
+          26.935,
+          26.83
+        ],
+        [
+          26.92625,
+          26.83
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_121",
+      "from": "mini_n_0_7",
+      "to": "mini_n_1_7",
+      "length": 973,
+      "speed": 40,
+      "name": "Station Road",
+      "geometry": [
+        [
+          26.9,
+          26.835
+        ],
+        [
+          26.90875,
+          26.835
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_122",
+      "from": "mini_n_1_7",
+      "to": "mini_n_0_7",
+      "length": 973,
+      "speed": 40,
+      "name": "Station Road",
+      "geometry": [
+        [
+          26.90875,
+          26.835
+        ],
+        [
+          26.9,
+          26.835
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_123",
+      "from": "mini_n_1_7",
+      "to": "mini_n_2_7",
+      "length": 973,
+      "speed": 40,
+      "name": "Station Road",
+      "geometry": [
+        [
+          26.90875,
+          26.835
+        ],
+        [
+          26.9175,
+          26.835
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_124",
+      "from": "mini_n_2_7",
+      "to": "mini_n_1_7",
+      "length": 973,
+      "speed": 40,
+      "name": "Station Road",
+      "geometry": [
+        [
+          26.9175,
+          26.835
+        ],
+        [
+          26.90875,
+          26.835
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_125",
+      "from": "mini_n_2_7",
+      "to": "mini_n_3_7",
+      "length": 973,
+      "speed": 40,
+      "name": "Station Road",
+      "geometry": [
+        [
+          26.9175,
+          26.835
+        ],
+        [
+          26.92625,
+          26.835
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_126",
+      "from": "mini_n_3_7",
+      "to": "mini_n_2_7",
+      "length": 973,
+      "speed": 40,
+      "name": "Station Road",
+      "geometry": [
+        [
+          26.92625,
+          26.835
+        ],
+        [
+          26.9175,
+          26.835
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_127",
+      "from": "mini_n_3_7",
+      "to": "mini_n_4_7",
+      "length": 973,
+      "speed": 40,
+      "name": "Station Road",
+      "geometry": [
+        [
+          26.92625,
+          26.835
+        ],
+        [
+          26.935,
+          26.835
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    },
+    {
+      "id": "mini_e_128",
+      "from": "mini_n_4_7",
+      "to": "mini_n_3_7",
+      "length": 973,
+      "speed": 40,
+      "name": "Station Road",
+      "geometry": [
+        [
+          26.935,
+          26.835
+        ],
+        [
+          26.92625,
+          26.835
+        ]
+      ],
+      "oneway": false,
+      "blocked": false,
+      "highwayType": "primary"
+    }
+  ],
+  "versionHash": "mini-city-fixture-v1"
+}
