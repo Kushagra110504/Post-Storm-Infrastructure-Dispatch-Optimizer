@@ -1,16 +1,18 @@
 import { describe, it, expect } from 'vitest';
-import * as fs from 'fs';
-import * as path from 'path';
+import { readFileSync, existsSync } from 'node:fs';
+import { resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { haversineDistance } from '../src/core/graph/haversine';
-import { computeBBox, projectLatLon } from '../src/core/graph/projection';
 import { CityGraph, CityGraphSchema, PlacesData, PlacesDataSchema } from '../src/core/model/schema';
 
-describe('Map Data Pipeline & Graph Modeling', () => {
-  const fixturePath = path.resolve(__dirname, 'fixtures', 'mini-city.json');
-  const placesFixturePath = path.resolve(__dirname, 'fixtures', 'mini-places.json');
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
-  const miniCity = JSON.parse(fs.readFileSync(fixturePath, 'utf-8')) as CityGraph;
-  const miniPlaces = JSON.parse(fs.readFileSync(placesFixturePath, 'utf-8')) as PlacesData;
+describe('Map Data Pipeline & Graph Modeling', () => {
+  const fixturePath = resolve(__dirname, 'fixtures', 'mini-city.json');
+  const placesFixturePath = resolve(__dirname, 'fixtures', 'mini-places.json');
+
+  const miniCity = JSON.parse(readFileSync(fixturePath, 'utf-8')) as CityGraph;
+  const miniPlaces = JSON.parse(readFileSync(placesFixturePath, 'utf-8')) as PlacesData;
 
   it('validates mini-city fixture against Zod schemas deterministically', () => {
     const parsedCity = CityGraphSchema.parse(miniCity);
@@ -62,7 +64,6 @@ describe('Map Data Pipeline & Graph Modeling', () => {
     expect(onewayEdges.length).toBeGreaterThan(0);
     expect(bidirectionalEdges.length).toBeGreaterThan(0);
 
-    // Oneway edge should permit traversal from -> to, but not to -> from on that specific edge
     for (const edge of onewayEdges) {
       expect(edge.oneway).toBe(true);
       expect(edge.from).not.toEqual(edge.to);
@@ -80,7 +81,6 @@ describe('Map Data Pipeline & Graph Modeling', () => {
       const fromNode = miniCity.nodes[edge.from]!;
       const toNode = miniCity.nodes[edge.to]!;
 
-      // Coordinates of endpoints must match node coordinates
       expect(firstPoint[0]).toBeCloseTo(fromNode.lat, 4);
       expect(firstPoint[1]).toBeCloseTo(fromNode.lon, 4);
       expect(lastPoint[0]).toBeCloseTo(toNode.lat, 4);
@@ -91,7 +91,6 @@ describe('Map Data Pipeline & Graph Modeling', () => {
       }
     }
 
-    // Must have preserved curvature/intermediate waypoints
     expect(multiPointGeometryCount).toBeGreaterThan(0);
   });
 
@@ -107,7 +106,6 @@ describe('Map Data Pipeline & Graph Modeling', () => {
         snappedNode!.lon,
       );
 
-      // Distance stored in place must match haversine distance
       expect(place.distanceToNode).toBeCloseTo(calculatedDist, 1);
     }
   });
@@ -128,12 +126,12 @@ describe('Map Data Pipeline & Graph Modeling', () => {
   });
 
   it('validates bundled real Jaipur dataset if present', () => {
-    const realCityPath = path.resolve(__dirname, '..', 'data', 'city.json');
-    const realPlacesPath = path.resolve(__dirname, '..', 'data', 'places.json');
+    const realCityPath = resolve(__dirname, '..', 'data', 'city.json');
+    const realPlacesPath = resolve(__dirname, '..', 'data', 'places.json');
 
-    if (fs.existsSync(realCityPath) && fs.existsSync(realPlacesPath)) {
-      const city = JSON.parse(fs.readFileSync(realCityPath, 'utf-8')) as CityGraph;
-      const places = JSON.parse(fs.readFileSync(realPlacesPath, 'utf-8')) as PlacesData;
+    if (existsSync(realCityPath) && existsSync(realPlacesPath)) {
+      const city = JSON.parse(readFileSync(realCityPath, 'utf-8')) as CityGraph;
+      const places = JSON.parse(readFileSync(realPlacesPath, 'utf-8')) as PlacesData;
 
       const parsedCity = CityGraphSchema.parse(city);
       const parsedPlaces = PlacesDataSchema.parse(places);
@@ -145,14 +143,12 @@ describe('Map Data Pipeline & Graph Modeling', () => {
       expect(parsedCity.edges.length).toBeGreaterThan(1000);
       expect(parsedPlaces.places.length).toBeGreaterThan(10);
 
-      // Verify all edges point to existing nodes
       for (const edge of parsedCity.edges) {
         expect(parsedCity.nodes[edge.from]).toBeDefined();
         expect(parsedCity.nodes[edge.to]).toBeDefined();
         expect(edge.geometry.length).toBeGreaterThanOrEqual(2);
       }
 
-      // Verify snapped places point to existing nodes
       for (const place of parsedPlaces.places) {
         expect(parsedCity.nodes[place.nearestNodeId]).toBeDefined();
         expect(place.distanceToNode).toBeLessThanOrEqual(1500);

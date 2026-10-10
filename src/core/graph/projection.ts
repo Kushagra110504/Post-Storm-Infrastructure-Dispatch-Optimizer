@@ -12,7 +12,7 @@ export function projectLatLon(
   minLat: number,
   minLon: number,
   maxLat: number,
-  maxLon: number,
+  _maxLon: number,
 ): { x: number; y: number } {
   const toRad = Math.PI / 180;
   const lat0 = ((minLat + maxLat) / 2) * toRad;

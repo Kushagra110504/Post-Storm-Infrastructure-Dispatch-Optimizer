@@ -1,5 +1,5 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import { haversineDistance, polylineLength } from '../src/core/graph/haversine';
 import { computeBBox, projectLatLon } from '../src/core/graph/projection';
 import {
