@@ -44,3 +44,20 @@ export function computeBBox(
     maxY: bottomRight.y,
   };
 }
+
+/**
+ * Inverts an (x, y) coordinate back to (lat, lon) using the inverse equirectangular projection.
+ */
+export function unprojectXY(
+  x: number,
+  y: number,
+  minLat: number,
+  minLon: number,
+  maxLat: number,
+): { lat: number; lon: number } {
+  const toRad = Math.PI / 180;
+  const lat0 = ((minLat + maxLat) / 2) * toRad;
+  const lat = maxLat - y / (toRad * EARTH_RADIUS_METERS);
+  const lon = minLon + x / (toRad * Math.cos(lat0) * EARTH_RADIUS_METERS);
+  return { lat, lon };
+}
