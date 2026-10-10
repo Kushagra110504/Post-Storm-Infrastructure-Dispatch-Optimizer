@@ -1,0 +1,1066 @@
+{
+  "places": [
+    {
+      "id": "place_1",
+      "name": "Santokba Durlabhji Memorial Hospital",
+      "type": "hospital",
+      "lat": 26.8935138,
+      "lon": 75.813656,
+      "nearestNodeId": "node_7098288291",
+      "distanceToNode": 35.8
+    },
+    {
+      "id": "place_2",
+      "name": "Central Jaipur water facility",
+      "type": "water_facility",
+      "lat": 26.8952914,
+      "lon": 75.7942939,
+      "nearestNodeId": "node_9190592946",
+      "distanceToNode": 25
+    },
+    {
+      "id": "place_3",
+      "name": "Central Jaipur water facility",
+      "type": "water_facility",
+      "lat": 26.9175145,
+      "lon": 75.7926159,
+      "nearestNodeId": "node_8642567246",
+      "distanceToNode": 23.2
+    },
+    {
+      "id": "place_4",
+      "name": "Central Jaipur water facility",
+      "type": "water_facility",
+      "lat": 26.9389868,
+      "lon": 75.7904443,
+      "nearestNodeId": "node_3780458949",
+      "distanceToNode": 46.3
+    },
+    {
+      "id": "place_5",
+      "name": "Central Jaipur water facility",
+      "type": "water_facility",
+      "lat": 26.9395203,
+      "lon": 75.7947339,
+      "nearestNodeId": "node_3780458968",
+      "distanceToNode": 62.1
+    },
+    {
+      "id": "place_6",
+      "name": "Central Jaipur water facility",
+      "type": "water_facility",
+      "lat": 26.9185378,
+      "lon": 75.8115218,
+      "nearestNodeId": "node_318557728",
+      "distanceToNode": 52.1
+    },
+    {
+      "id": "place_7",
+      "name": "Central Jaipur water facility",
+      "type": "water_facility",
+      "lat": 26.8998502,
+      "lon": 75.8324675,
+      "nearestNodeId": "node_1813608420",
+      "distanceToNode": 31
+    },
+    {
+      "id": "place_8",
+      "name": "SDMH",
+      "type": "hospital",
+      "lat": 26.893253,
+      "lon": 75.812105,
+      "nearestNodeId": "node_3783076377",
+      "distanceToNode": 82.9
+    },
+    {
+      "id": "place_9",
+      "name": "soni hospital",
+      "type": "hospital",
+      "lat": 26.8951673,
+      "lon": 75.8149318,
+      "nearestNodeId": "node_3783036253",
+      "distanceToNode": 39.4
+    },
+    {
+      "id": "place_10",
+      "name": "jaipur dental hospital",
+      "type": "hospital",
+      "lat": 26.9185644,
+      "lon": 75.8077715,
+      "nearestNodeId": "node_316957463",
+      "distanceToNode": 8.1
+    },
+    {
+      "id": "place_11",
+      "name": "Central Jaipur hospital",
+      "type": "hospital",
+      "lat": 26.9063113,
+      "lon": 75.8150111,
+      "nearestNodeId": "node_1812540137",
+      "distanceToNode": 19.5
+    },
+    {
+      "id": "place_12",
+      "name": "Sawai Man Singh Hospital, Jaipur",
+      "type": "hospital",
+      "lat": 26.9060159,
+      "lon": 75.8161049,
+      "nearestNodeId": "node_316742978",
+      "distanceToNode": 112.5
+    },
+    {
+      "id": "place_13",
+      "name": "SMS Trauma Center",
+      "type": "hospital",
+      "lat": 26.90734,
+      "lon": 75.8146282,
+      "nearestNodeId": "node_1812540190",
+      "distanceToNode": 69.4
+    },
+    {
+      "id": "place_14",
+      "name": "Police Station",
+      "type": "police",
+      "lat": 26.9177909,
+      "lon": 75.7950769,
+      "nearestNodeId": "node_319160775",
+      "distanceToNode": 22.3
+    },
+    {
+      "id": "place_15",
+      "name": "Dr. Ramani's Dental Practice",
+      "type": "hospital",
+      "lat": 26.8918721,
+      "lon": 75.8101422,
+      "nearestNodeId": "node_320954648",
+      "distanceToNode": 53.8
+    },
+    {
+      "id": "place_16",
+      "name": "Sanjavani hospital",
+      "type": "hospital",
+      "lat": 26.931796,
+      "lon": 75.7918159,
+      "nearestNodeId": "node_956220207",
+      "distanceToNode": 22.8
+    },
+    {
+      "id": "place_17",
+      "name": "Police Station",
+      "type": "police",
+      "lat": 26.9320929,
+      "lon": 75.8176035,
+      "nearestNodeId": "node_8637288041",
+      "distanceToNode": 21.2
+    },
+    {
+      "id": "place_18",
+      "name": "Sharma Hospital, Jaipur",
+      "type": "hospital",
+      "lat": 26.9068181,
+      "lon": 75.8245965,
+      "nearestNodeId": "node_317206085",
+      "distanceToNode": 48.7
+    },
+    {
+      "id": "place_19",
+      "name": "K.M.S.Hospital",
+      "type": "hospital",
+      "lat": 26.8953299,
+      "lon": 75.8208033,
+      "nearestNodeId": "node_321195457",
+      "distanceToNode": 26.7
+    },
+    {
+      "id": "place_20",
+      "name": "Anil Hospital",
+      "type": "hospital",
+      "lat": 26.9075955,
+      "lon": 75.8238333,
+      "nearestNodeId": "node_317205945",
+      "distanceToNode": 40.7
+    },
+    {
+      "id": "place_21",
+      "name": "Anand Eye Hospital",
+      "type": "hospital",
+      "lat": 26.9081588,
+      "lon": 75.7963179,
+      "nearestNodeId": "node_318883426",
+      "distanceToNode": 31.1
+    },
+    {
+      "id": "place_22",
+      "name": "Amodh Hospital",
+      "type": "hospital",
+      "lat": 26.8977635,
+      "lon": 75.8322018,
+      "nearestNodeId": "node_1813613428",
+      "distanceToNode": 52.7
+    },
+    {
+      "id": "place_23",
+      "name": "Amar Jain Hospital",
+      "type": "hospital",
+      "lat": 26.9204054,
+      "lon": 75.821414,
+      "nearestNodeId": "node_8637124077",
+      "distanceToNode": 57.8
+    },
+    {
+      "id": "place_24",
+      "name": "Dr Roy Chowdary's Institute Of Urology",
+      "type": "hospital",
+      "lat": 26.901251,
+      "lon": 75.7969281,
+      "nearestNodeId": "node_318884982",
+      "distanceToNode": 26.9
+    },
+    {
+      "id": "place_25",
+      "name": "J. K. Loan Hospital",
+      "type": "hospital",
+      "lat": 26.9014055,
+      "lon": 75.8177174,
+      "nearestNodeId": "node_317150352",
+      "distanceToNode": 99
+    },
+    {
+      "id": "place_26",
+      "name": "International Fertility and Health Care Centre",
+      "type": "hospital",
+      "lat": 26.8973018,
+      "lon": 75.8109118,
+      "nearestNodeId": "node_321194335",
+      "distanceToNode": 53.5
+    },
+    {
+      "id": "place_27",
+      "name": "Indowestern Brain and Spine Hospital",
+      "type": "hospital",
+      "lat": 26.8917103,
+      "lon": 75.8002755,
+      "nearestNodeId": "node_14038619196",
+      "distanceToNode": 32.3
+    },
+    {
+      "id": "place_28",
+      "name": "Holy Family Hospital, Jaipur",
+      "type": "hospital",
+      "lat": 26.8935881,
+      "lon": 75.8243215,
+      "nearestNodeId": "node_321196397",
+      "distanceToNode": 34.4
+    },
+    {
+      "id": "place_29",
+      "name": "Heart and General Hospital",
+      "type": "hospital",
+      "lat": 26.9086623,
+      "lon": 75.8108716,
+      "nearestNodeId": "node_318565079",
+      "distanceToNode": 52.6
+    },
+    {
+      "id": "place_30",
+      "name": "Uniara Hospital",
+      "type": "hospital",
+      "lat": 26.8979427,
+      "lon": 75.8178108,
+      "nearestNodeId": "node_321195832",
+      "distanceToNode": 46.9
+    },
+    {
+      "id": "place_31",
+      "name": "Bhiwani Eye Care Centre",
+      "type": "hospital",
+      "lat": 26.9025702,
+      "lon": 75.8257002,
+      "nearestNodeId": "node_317190069",
+      "distanceToNode": 34.6
+    },
+    {
+      "id": "place_32",
+      "name": "Carewell Hospital",
+      "type": "hospital",
+      "lat": 26.9009951,
+      "lon": 75.8267596,
+      "nearestNodeId": "node_1813608487",
+      "distanceToNode": 47.9
+    },
+    {
+      "id": "place_33",
+      "name": "Government Dental College and Hospital, Jaipur",
+      "type": "hospital",
+      "lat": 26.9378,
+      "lon": 75.7929099,
+      "nearestNodeId": "node_3780458645",
+      "distanceToNode": 99.4
+    },
+    {
+      "id": "place_34",
+      "name": "Zanana Hospital",
+      "type": "hospital",
+      "lat": 26.9263698,
+      "lon": 75.806627,
+      "nearestNodeId": "node_3929090514",
+      "distanceToNode": 47.6
+    },
+    {
+      "id": "place_35",
+      "name": "Jain Hospital, Jaipur",
+      "type": "hospital",
+      "lat": 26.8968605,
+      "lon": 75.8372819,
+      "nearestNodeId": "node_3783477327",
+      "distanceToNode": 12.7
+    },
+    {
+      "id": "place_36",
+      "name": "Jain ENT Hospital, Jaipur",
+      "type": "hospital",
+      "lat": 26.8915847,
+      "lon": 75.800187,
+      "nearestNodeId": "node_2392683764",
+      "distanceToNode": 19.5
+    },
+    {
+      "id": "place_37",
+      "name": "Madan Parnami Memorial Hospital",
+      "type": "hospital",
+      "lat": 26.8976523,
+      "lon": 75.8240989,
+      "nearestNodeId": "node_317195732",
+      "distanceToNode": 14.9
+    },
+    {
+      "id": "place_38",
+      "name": "K.K Diagnostic Centre , Jaipur",
+      "type": "hospital",
+      "lat": 26.9260733,
+      "lon": 75.8314803,
+      "nearestNodeId": "node_8637977400",
+      "distanceToNode": 29.1
+    },
+    {
+      "id": "place_39",
+      "name": "K.C. Memorial Eye Hospital",
+      "type": "hospital",
+      "lat": 26.9136622,
+      "lon": 75.8025286,
+      "nearestNodeId": "node_318565443",
+      "distanceToNode": 30.8
+    },
+    {
+      "id": "place_40",
+      "name": "Vasundhra Hospital",
+      "type": "hospital",
+      "lat": 26.898218,
+      "lon": 75.8236563,
+      "nearestNodeId": "node_11586739592",
+      "distanceToNode": 28.7
+    },
+    {
+      "id": "place_41",
+      "name": "Soni Hospital",
+      "type": "hospital",
+      "lat": 26.8957806,
+      "lon": 75.8146733,
+      "nearestNodeId": "node_2393563625",
+      "distanceToNode": 63.2
+    },
+    {
+      "id": "place_42",
+      "name": "Royal Eye Care and Research Centre",
+      "type": "hospital",
+      "lat": 26.899285,
+      "lon": 75.8339544,
+      "nearestNodeId": "node_3783477486",
+      "distanceToNode": 36.6
+    },
+    {
+      "id": "place_43",
+      "name": "Chawla Hospital and Laparoscopy Centre",
+      "type": "hospital",
+      "lat": 26.8995779,
+      "lon": 75.8318694,
+      "nearestNodeId": "node_317195351",
+      "distanceToNode": 39.5
+    },
+    {
+      "id": "place_44",
+      "name": "Gangori Hospital",
+      "type": "hospital",
+      "lat": 26.9303934,
+      "lon": 75.8203457,
+      "nearestNodeId": "node_7071483515",
+      "distanceToNode": 61.7
+    },
+    {
+      "id": "place_45",
+      "name": "Goyal Hospital, Jaipur",
+      "type": "hospital",
+      "lat": 26.9379927,
+      "lon": 75.8008106,
+      "nearestNodeId": "node_8645913037",
+      "distanceToNode": 35
+    },
+    {
+      "id": "place_46",
+      "name": "Ram Avtar Eye Hospital and Glaucoma Pavilion",
+      "type": "hospital",
+      "lat": 26.89272,
+      "lon": 75.8242251,
+      "nearestNodeId": "node_321196393",
+      "distanceToNode": 27.7
+    },
+    {
+      "id": "place_47",
+      "name": "Dr.Mamodias Proctology and IRC Centre",
+      "type": "hospital",
+      "lat": 26.8970829,
+      "lon": 75.8233532,
+      "nearestNodeId": "node_321195668",
+      "distanceToNode": 20.2
+    },
+    {
+      "id": "place_48",
+      "name": "Kcj Diagnostic and Research Center",
+      "type": "hospital",
+      "lat": 26.9059822,
+      "lon": 75.8130455,
+      "nearestNodeId": "node_7085415447",
+      "distanceToNode": 92.8
+    },
+    {
+      "id": "place_49",
+      "name": "Dr Agarwals Eye Hospital",
+      "type": "hospital",
+      "lat": 26.9080954,
+      "lon": 75.7908113,
+      "nearestNodeId": "node_8191088075",
+      "distanceToNode": 51.3
+    },
+    {
+      "id": "place_50",
+      "name": "Nirmala Hospital and Research Center",
+      "type": "hospital",
+      "lat": 26.9098833,
+      "lon": 75.8023066,
+      "nearestNodeId": "node_14063184560",
+      "distanceToNode": 107.3
+    },
+    {
+      "id": "place_51",
+      "name": "Raj Khurana Memorial Hospital",
+      "type": "hospital",
+      "lat": 26.8972528,
+      "lon": 75.8260462,
+      "nearestNodeId": "node_8631902584",
+      "distanceToNode": 35.5
+    },
+    {
+      "id": "place_52",
+      "name": "Pragati Orthopaedic and General Hospital",
+      "type": "hospital",
+      "lat": 26.9032106,
+      "lon": 75.8354983,
+      "nearestNodeId": "node_317400338",
+      "distanceToNode": 37
+    },
+    {
+      "id": "place_53",
+      "name": "Arya Hospital- Jaipur",
+      "type": "hospital",
+      "lat": 26.9003923,
+      "lon": 75.8190637,
+      "nearestNodeId": "node_8631815537",
+      "distanceToNode": 15.9
+    },
+    {
+      "id": "place_54",
+      "name": "Swastik Hospital, Jaipur",
+      "type": "hospital",
+      "lat": 26.8916923,
+      "lon": 75.8398126,
+      "nearestNodeId": "node_3783476973",
+      "distanceToNode": 23.8
+    },
+    {
+      "id": "place_55",
+      "name": "Nova Specialty Surgery",
+      "type": "hospital",
+      "lat": 26.9136323,
+      "lon": 75.8127075,
+      "nearestNodeId": "node_8668221170",
+      "distanceToNode": 57.3
+    },
+    {
+      "id": "place_56",
+      "name": "Sr Kalla Memorial Gastro and General Hospital",
+      "type": "hospital",
+      "lat": 26.9128574,
+      "lon": 75.7970139,
+      "nearestNodeId": "node_318566037",
+      "distanceToNode": 48.1
+    },
+    {
+      "id": "place_57",
+      "name": "Dhuleshwar Hospital and Laser Skin Centre",
+      "type": "hospital",
+      "lat": 26.9139408,
+      "lon": 75.7984489,
+      "nearestNodeId": "node_4759221777",
+      "distanceToNode": 23
+    },
+    {
+      "id": "place_58",
+      "name": "Vivekanand Hospital and Fertility Centre",
+      "type": "hospital",
+      "lat": 26.9144575,
+      "lon": 75.7962348,
+      "nearestNodeId": "node_318566006",
+      "distanceToNode": 13.8
+    },
+    {
+      "id": "place_59",
+      "name": "Sahai Hospital and Research Centre",
+      "type": "hospital",
+      "lat": 26.8959216,
+      "lon": 75.8198114,
+      "nearestNodeId": "node_321195447",
+      "distanceToNode": 39.7
+    },
+    {
+      "id": "place_60",
+      "name": "Aditya Hospital, Jaipur",
+      "type": "hospital",
+      "lat": 26.8902546,
+      "lon": 75.7993931,
+      "nearestNodeId": "node_2392592840",
+      "distanceToNode": 29.5
+    },
+    {
+      "id": "place_61",
+      "name": "Meera Hospital, Jaipur",
+      "type": "hospital",
+      "lat": 26.929878,
+      "lon": 75.8011875,
+      "nearestNodeId": "node_2830765886",
+      "distanceToNode": 39.8
+    },
+    {
+      "id": "place_62",
+      "name": "Maharshi Child Hospital",
+      "type": "hospital",
+      "lat": 26.9359662,
+      "lon": 75.7957385,
+      "nearestNodeId": "node_11217680037",
+      "distanceToNode": 23
+    },
+    {
+      "id": "place_63",
+      "name": "Satellite Hospital, Jaipur",
+      "type": "hospital",
+      "lat": 26.928861,
+      "lon": 75.7972808,
+      "nearestNodeId": "node_316564705",
+      "distanceToNode": 44.6
+    },
+    {
+      "id": "place_64",
+      "name": "Dr Sardar Singh Memorial Hospital(Managed By M/S Kamal Clinic and Nursing Home)",
+      "type": "hospital",
+      "lat": 26.9318006,
+      "lon": 75.793002,
+      "nearestNodeId": "node_956220205",
+      "distanceToNode": 79.2
+    },
+    {
+      "id": "place_65",
+      "name": "Dr Atuls Child Hospital",
+      "type": "hospital",
+      "lat": 26.9344657,
+      "lon": 75.7975852,
+      "nearestNodeId": "node_2685104857",
+      "distanceToNode": 41.3
+    },
+    {
+      "id": "place_66",
+      "name": "Mahila Chikitsalya",
+      "type": "hospital",
+      "lat": 26.9143851,
+      "lon": 75.8241183,
+      "nearestNodeId": "node_6869205810",
+      "distanceToNode": 84.2
+    },
+    {
+      "id": "place_67",
+      "name": "Dugra Devi Memorial Hospital",
+      "type": "hospital",
+      "lat": 26.9342445,
+      "lon": 75.7985401,
+      "nearestNodeId": "node_4787494222",
+      "distanceToNode": 23.7
+    },
+    {
+      "id": "place_68",
+      "name": "Dr. Panicker's Sanjeevani Hospital Pvt. Ltd.",
+      "type": "hospital",
+      "lat": 26.9322525,
+      "lon": 75.7918172,
+      "nearestNodeId": "node_3780462616",
+      "distanceToNode": 6.2
+    },
+    {
+      "id": "place_69",
+      "name": "T.B. Cenetorium",
+      "type": "hospital",
+      "lat": 26.9372802,
+      "lon": 75.795701,
+      "nearestNodeId": "node_11217690728",
+      "distanceToNode": 9
+    },
+    {
+      "id": "place_70",
+      "name": "Dr.M.R.Grewal Memorial Hospital",
+      "type": "hospital",
+      "lat": 26.93543,
+      "lon": 75.7980855,
+      "nearestNodeId": "node_542886795",
+      "distanceToNode": 38.4
+    },
+    {
+      "id": "place_71",
+      "name": "Central Jaipur water facility",
+      "type": "water_facility",
+      "lat": 26.8941343,
+      "lon": 75.7932475,
+      "nearestNodeId": "node_7098288459",
+      "distanceToNode": 44.3
+    },
+    {
+      "id": "place_72",
+      "name": "TB Hospital",
+      "type": "hospital",
+      "lat": 26.9379473,
+      "lon": 75.7948581,
+      "nearestNodeId": "node_3780458650",
+      "distanceToNode": 101
+    },
+    {
+      "id": "place_73",
+      "name": "Government Satellite Hospital, Banipark  , Jaipur",
+      "type": "hospital",
+      "lat": 26.928678,
+      "lon": 75.7972582,
+      "nearestNodeId": "node_316564705",
+      "distanceToNode": 35.6
+    },
+    {
+      "id": "place_74",
+      "name": "Government Hospital",
+      "type": "hospital",
+      "lat": 26.903108,
+      "lon": 75.838214,
+      "nearestNodeId": "node_7058917514",
+      "distanceToNode": 84.7
+    },
+    {
+      "id": "place_75",
+      "name": "Anupam Eye Hospital",
+      "type": "hospital",
+      "lat": 26.8909671,
+      "lon": 75.8021812,
+      "nearestNodeId": "node_2392592816",
+      "distanceToNode": 36.4
+    },
+    {
+      "id": "place_76",
+      "name": "Triveni Hospital",
+      "type": "hospital",
+      "lat": 26.9170977,
+      "lon": 75.7952368,
+      "nearestNodeId": "node_319160819",
+      "distanceToNode": 41.8
+    },
+    {
+      "id": "place_77",
+      "name": "Raisinghani Hospital",
+      "type": "hospital",
+      "lat": 26.9343462,
+      "lon": 75.7904621,
+      "nearestNodeId": "node_3723525871",
+      "distanceToNode": 54.4
+    },
+    {
+      "id": "place_78",
+      "name": "Mahaveer Charitable Hospital",
+      "type": "hospital",
+      "lat": 26.8995994,
+      "lon": 75.8245468,
+      "nearestNodeId": "node_317193962",
+      "distanceToNode": 37.9
+    },
+    {
+      "id": "place_79",
+      "name": "ASG Eye Hospital",
+      "type": "hospital",
+      "lat": 26.914966,
+      "lon": 75.809544,
+      "nearestNodeId": "node_14074436344",
+      "distanceToNode": 26.8
+    },
+    {
+      "id": "place_80",
+      "name": "Sagar Hospital",
+      "type": "hospital",
+      "lat": 26.9134146,
+      "lon": 75.8286492,
+      "nearestNodeId": "node_8642739565",
+      "distanceToNode": 36.6
+    },
+    {
+      "id": "place_81",
+      "name": "Rama Hospital",
+      "type": "hospital",
+      "lat": 26.924219,
+      "lon": 75.8356,
+      "nearestNodeId": "node_8637973974",
+      "distanceToNode": 16.4
+    },
+    {
+      "id": "place_82",
+      "name": "Pink City Fracture & General Hospital",
+      "type": "hospital",
+      "lat": 26.9251063,
+      "lon": 75.8112535,
+      "nearestNodeId": "node_8643056231",
+      "distanceToNode": 55
+    },
+    {
+      "id": "place_83",
+      "name": "Health Aid Hospital",
+      "type": "hospital",
+      "lat": 26.9020539,
+      "lon": 75.8261836,
+      "nearestNodeId": "node_317195065",
+      "distanceToNode": 26.4
+    },
+    {
+      "id": "place_84",
+      "name": "Akhila Hospital",
+      "type": "hospital",
+      "lat": 26.9151062,
+      "lon": 75.826897,
+      "nearestNodeId": "node_8643147154",
+      "distanceToNode": 29.1
+    },
+    {
+      "id": "place_85",
+      "name": "Child Care Hospital",
+      "type": "hospital",
+      "lat": 26.9035633,
+      "lon": 75.8222385,
+      "nearestNodeId": "node_317198308",
+      "distanceToNode": 25.9
+    },
+    {
+      "id": "place_86",
+      "name": "MDM Hospital",
+      "type": "hospital",
+      "lat": 26.9025327,
+      "lon": 75.8211928,
+      "nearestNodeId": "node_317150454",
+      "distanceToNode": 60.1
+    },
+    {
+      "id": "place_87",
+      "name": "Mahaveer Jain Hospital",
+      "type": "hospital",
+      "lat": 26.901026,
+      "lon": 75.825743,
+      "nearestNodeId": "node_317368195",
+      "distanceToNode": 31.1
+    },
+    {
+      "id": "place_88",
+      "name": "New life Hospital",
+      "type": "hospital",
+      "lat": 26.9254445,
+      "lon": 75.8102949,
+      "nearestNodeId": "node_8643056221",
+      "distanceToNode": 43.3
+    },
+    {
+      "id": "place_89",
+      "name": "Vijay Hospital",
+      "type": "hospital",
+      "lat": 26.8921005,
+      "lon": 75.8189267,
+      "nearestNodeId": "node_11209570039",
+      "distanceToNode": 37.7
+    },
+    {
+      "id": "place_90",
+      "name": "Mangalam Hospital",
+      "type": "hospital",
+      "lat": 26.8988531,
+      "lon": 75.8339104,
+      "nearestNodeId": "node_1813580604",
+      "distanceToNode": 29.6
+    },
+    {
+      "id": "place_91",
+      "name": "Sahai Hospital",
+      "type": "hospital",
+      "lat": 26.8958902,
+      "lon": 75.8203134,
+      "nearestNodeId": "node_321195253",
+      "distanceToNode": 7.5
+    },
+    {
+      "id": "place_92",
+      "name": "Mahesh Hospital",
+      "type": "hospital",
+      "lat": 26.9229133,
+      "lon": 75.8089218,
+      "nearestNodeId": "node_316955718",
+      "distanceToNode": 13.6
+    },
+    {
+      "id": "place_93",
+      "name": "Suraj Hospial",
+      "type": "hospital",
+      "lat": 26.8990777,
+      "lon": 75.824377,
+      "nearestNodeId": "node_317193962",
+      "distanceToNode": 32.6
+    },
+    {
+      "id": "place_94",
+      "name": "Health Line Hospital",
+      "type": "hospital",
+      "lat": 26.9077102,
+      "lon": 75.8299074,
+      "nearestNodeId": "node_11586586971",
+      "distanceToNode": 39.2
+    },
+    {
+      "id": "place_95",
+      "name": "Goyal Hospital",
+      "type": "hospital",
+      "lat": 26.9186623,
+      "lon": 75.8214178,
+      "nearestNodeId": "node_317132341",
+      "distanceToNode": 16.5
+    },
+    {
+      "id": "place_96",
+      "name": "Solanki Hospital",
+      "type": "hospital",
+      "lat": 26.9272446,
+      "lon": 75.819232,
+      "nearestNodeId": "node_542886851",
+      "distanceToNode": 28.3
+    },
+    {
+      "id": "place_97",
+      "name": "Alok Nursing Home & Fracture Clinic",
+      "type": "hospital",
+      "lat": 26.91858,
+      "lon": 75.8311973,
+      "nearestNodeId": "node_317132791",
+      "distanceToNode": 20.4
+    },
+    {
+      "id": "place_98",
+      "name": "Falor Eye and Phaco Surgery Centre",
+      "type": "hospital",
+      "lat": 26.9193316,
+      "lon": 75.8309094,
+      "nearestNodeId": "node_3782956698",
+      "distanceToNode": 92.7
+    },
+    {
+      "id": "place_99",
+      "name": "Santokba Durlabhji Memorial Hospital",
+      "type": "hospital",
+      "lat": 26.8935766,
+      "lon": 75.8125166,
+      "nearestNodeId": "node_3783076376",
+      "distanceToNode": 112.9
+    },
+    {
+      "id": "place_100",
+      "name": "M.D. Hospital",
+      "type": "hospital",
+      "lat": 26.9124912,
+      "lon": 75.8246404,
+      "nearestNodeId": "node_317399337",
+      "distanceToNode": 90.6
+    },
+    {
+      "id": "place_101",
+      "name": "Adinath ENT & General Hospital",
+      "type": "hospital",
+      "lat": 26.8915481,
+      "lon": 75.8265711,
+      "nearestNodeId": "node_1813608560",
+      "distanceToNode": 45.7
+    },
+    {
+      "id": "place_102",
+      "name": "Bhiwani Eye Hospital",
+      "type": "hospital",
+      "lat": 26.9200507,
+      "lon": 75.8217693,
+      "nearestNodeId": "node_317132026",
+      "distanceToNode": 28.8
+    },
+    {
+      "id": "place_103",
+      "name": "Jai Hospital & Research Centre",
+      "type": "hospital",
+      "lat": 26.9192023,
+      "lon": 75.8167578,
+      "nearestNodeId": "node_8633919306",
+      "distanceToNode": 62.9
+    },
+    {
+      "id": "place_104",
+      "name": "Police Station Subhash Chowk , Jaipur",
+      "type": "police",
+      "lat": 26.9290701,
+      "lon": 75.8324821,
+      "nearestNodeId": "node_4763660768",
+      "distanceToNode": 30
+    },
+    {
+      "id": "place_105",
+      "name": "Police Station Adarsh Nagar",
+      "type": "police",
+      "lat": 26.9024266,
+      "lon": 75.8348836,
+      "nearestNodeId": "node_317191172",
+      "distanceToNode": 36.9
+    },
+    {
+      "id": "place_106",
+      "name": "Maxwell",
+      "type": "hospital",
+      "lat": 26.9344284,
+      "lon": 75.7948812,
+      "nearestNodeId": "node_11217724038",
+      "distanceToNode": 23.1
+    },
+    {
+      "id": "place_107",
+      "name": "Central Jaipur police",
+      "type": "police",
+      "lat": 26.9252096,
+      "lon": 75.8254757,
+      "nearestNodeId": "node_4748295508",
+      "distanceToNode": 175.6
+    },
+    {
+      "id": "place_108",
+      "name": "Police Thana Manak Chowk",
+      "type": "police",
+      "lat": 26.9231805,
+      "lon": 75.8275598,
+      "nearestNodeId": "node_5403055413",
+      "distanceToNode": 46.3
+    },
+    {
+      "id": "place_109",
+      "name": "Jaipur Hospital",
+      "type": "hospital",
+      "lat": 26.8925441,
+      "lon": 75.8045365,
+      "nearestNodeId": "node_11078642327",
+      "distanceToNode": 46.2
+    },
+    {
+      "id": "place_110",
+      "name": "Sant Ram Memorial Tandon Eye Centre",
+      "type": "hospital",
+      "lat": 26.9127522,
+      "lon": 75.7901045,
+      "nearestNodeId": "node_2105800667",
+      "distanceToNode": 59
+    },
+    {
+      "id": "place_111",
+      "name": "Central Jaipur power substation",
+      "type": "power_substation",
+      "lat": 26.8920126,
+      "lon": 75.8034516,
+      "nearestNodeId": "node_2392676976",
+      "distanceToNode": 60.5
+    },
+    {
+      "id": "place_112",
+      "name": "Central Jaipur water facility",
+      "type": "water_facility",
+      "lat": 26.9305153,
+      "lon": 75.7903915,
+      "nearestNodeId": "node_316564239",
+      "distanceToNode": 54.2
+    },
+    {
+      "id": "place_113",
+      "name": "Central Jaipur water facility",
+      "type": "water_facility",
+      "lat": 26.9381358,
+      "lon": 75.7899167,
+      "nearestNodeId": "node_3780458912",
+      "distanceToNode": 126.3
+    },
+    {
+      "id": "place_114",
+      "name": "Central Jaipur water facility",
+      "type": "water_facility",
+      "lat": 26.8985748,
+      "lon": 75.7905964,
+      "nearestNodeId": "node_3782909405",
+      "distanceToNode": 126.7
+    },
+    {
+      "id": "place_115",
+      "name": "Central Jaipur hospital",
+      "type": "hospital",
+      "lat": 26.9029312,
+      "lon": 75.8385007,
+      "nearestNodeId": "node_7058917514",
+      "distanceToNode": 109.2
+    },
+    {
+      "id": "place_116",
+      "name": "policr thana manak chowk",
+      "type": "police",
+      "lat": 26.9224223,
+      "lon": 75.8271042,
+      "nearestNodeId": "node_14058331326",
+      "distanceToNode": 39.2
+    },
+    {
+      "id": "place_117",
+      "name": "Central Jaipur power substation",
+      "type": "power_substation",
+      "lat": 26.9237004,
+      "lon": 75.8038193,
+      "nearestNodeId": "node_3780458550",
+      "distanceToNode": 34.4
+    },
+    {
+      "id": "place_118",
+      "name": "Central Jaipur power substation",
+      "type": "power_substation",
+      "lat": 26.9188707,
+      "lon": 75.7928519,
+      "nearestNodeId": "node_8191088063",
+      "distanceToNode": 60.5
+    }
+  ]
+}
