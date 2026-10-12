@@ -1,19 +1,19 @@
 # GridRescue: Project Context
 
 ## Current State
-- **Phase**: 2 (Offline SVG Map Renderer completed)
-- **Status**: 100% offline GPU-accelerated SVG map engine with pan/zoom, LOD hierarchy, real facility markers/labels, spatial index picking, and road click-to-block interaction.
-- **Test Count**: 28 passing unit tests (2 RNG, 7 map-data, 5 projection, 6 spatial-index, 8 road-blocking).
+- **Phase**: 3 (Domain & Scenario Engine completed)
+- **Status**: Seeded 12/8/5 Jaipur scenario generator (12 incidents, 8 crews, 5 critical facilities) with guaranteed cross-incident dependencies and router-verified road blocking. Secure Zod import/export. Interactive scenario viewer with crew and facility inspectors.
+- **Test Count**: 43 passing unit tests across 7 test suites.
 
 ## Key Architectural Decisions
-- **Offline SVG Rendering**: Pre-projected metric coordinates transformed via SVG `<g>` matrix; zero external tile SDKs or runtime network calls.
-- **LOD Pipeline**: Scale-aware road culling (motorways -> primary -> secondary -> all) and facility visibility ensures 60 FPS performance on 8,000+ edges.
-- **Spatial Index**: Uniform 2D grid index with boundary clamping for O(1) nearest-node and nearest-edge picking.
-- **Road Blocking**: Interactive stroke hit targets toggle road closures with glowing hazard markers; managed reactively via immutable Zustand store.
+- **12/8/5 Scenario Generator**: Deterministic by seed (Mulberry32). Generates 4 power, 3 water, 2 comms, 3 road incidents on real Jaipur OSM places with required skill/vehicle/equipment alignments.
+- **Guaranteed Road Blocking**: Dijkstra router verifies a road incident blocks the shortest path to a hospital-linked power fault, ensuring dispatch ordering strictly matters.
+- **Security & Schema**: Full Zod schema validation on scenario model; import guards against prototype pollution, file size > 1MB, and non-existent graph node/edge references.
+- **UI Scenario Viewer**: Real incident and crew depot markers on SVG map with severity badges, dependency tags, and inspector tabs.
 
 ## How to Run
 - `npm run dev`: Launch Vite development server
-- `npm run test`: Run Vitest unit tests (all 28 tests pass)
-- `npm run typecheck`: Run TypeScript compiler check (both browser and script tsconfigs)
+- `npm run test`: Run Vitest unit tests (all 43 tests pass)
+- `npm run typecheck`: Run TypeScript compiler check (browser & scripts)
 - `npm run lint`: Run ESLint check
 - `npm run build`: Build production bundle

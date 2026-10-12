@@ -1,2 +1,2 @@
-// Scenario generator placeholder (populated in Phase 3)
-export {};
+export * from './generator';
+export * from './io';

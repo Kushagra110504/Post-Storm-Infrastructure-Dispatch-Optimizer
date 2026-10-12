@@ -1,5 +1,5 @@
 import React, { useRef, useCallback, useEffect, useState, useMemo } from 'react';
-import { CityGraph, CityEdge, Place, PlaceType } from '../core/model/schema';
+import { CityGraph, CityEdge, Place, PlaceType, Incident, Team } from '../core/model/schema';
 import { SpatialIndex } from '../core/graph/spatialIndex';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -14,14 +14,20 @@ export interface MapRendererProps {
   graph: CityGraph;
   places: Place[];
   spatialIndex: SpatialIndex;
+  incidents?: Incident[];
+  teams?: Team[];
   blockedEdgeIds?: Set<string>;
   selectedNodeId?: string | null;
   selectedEdgeId?: string | null;
+  selectedIncidentId?: string | null;
+  selectedTeamId?: string | null;
   filterPlaceType?: PlaceType | 'all';
   onNodeClick?: (nodeId: string) => void;
   onEdgeClick?: (edge: CityEdge) => void;
   onEdgeToggle?: (edgeId: string) => void;
   onPlaceClick?: (place: Place) => void;
+  onIncidentClick?: (incident: Incident) => void;
+  onTeamClick?: (team: Team) => void;
   width?: number;
   height?: number;
 }
@@ -68,20 +74,33 @@ export const PLACE_CONFIG: Record<PlaceType, { icon: string; color: string; labe
   townhall:         { icon: '🏛️', color: '#94a3b8', label: 'Town Hall' },
 };
 
+export const INCIDENT_CONFIG: Record<string, { icon: string; color: string; label: string }> = {
+  power: { icon: '⚡', color: '#f59e0b', label: 'Power Outage' },
+  water: { icon: '💧', color: '#06b6d4', label: 'Water Rupture' },
+  comms: { icon: '📡', color: '#8b5cf6', label: 'Comms Failure' },
+  road:  { icon: '🚧', color: '#ef4444', label: 'Road Blockage' },
+};
+
 // ─── MapRenderer Component ──────────────────────────────────────────────────
 
 export const MapRenderer: React.FC<MapRendererProps> = ({
   graph,
   places,
   spatialIndex,
+  incidents = [],
+  teams = [],
   blockedEdgeIds = new Set<string>(),
   selectedNodeId = null,
   selectedEdgeId = null,
+  selectedIncidentId = null,
+  selectedTeamId = null,
   filterPlaceType = 'all',
   onNodeClick,
   onEdgeClick,
   onEdgeToggle,
   onPlaceClick,
+  onIncidentClick,
+  onTeamClick,
   width = 900,
   height = 650,
 }) => {
@@ -99,6 +118,8 @@ export const MapRenderer: React.FC<MapRendererProps> = ({
 
   const [hoveredEdgeId, setHoveredEdgeId] = useState<string | null>(null);
   const [hoveredPlaceId, setHoveredPlaceId] = useState<string | null>(null);
+  const [hoveredIncidentId, setHoveredIncidentId] = useState<string | null>(null);
+  const [hoveredTeamId, setHoveredTeamId] = useState<string | null>(null);
 
   const isPanning = useRef(false);
   const hasMovedWhilePanning = useRef(false);
@@ -188,7 +209,6 @@ export const MapRenderer: React.FC<MapRendererProps> = ({
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      // Don't intercept if user is typing in an input
       if (['INPUT', 'SELECT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) {
         return;
       }
@@ -232,11 +252,10 @@ export const MapRenderer: React.FC<MapRendererProps> = ({
     const sx = e.clientX - rect.left;
     const sy = e.clientY - rect.top;
 
-    // Convert screen coordinates to meters
     const mx = (sx - view.offsetX) / view.scale;
     const my = (sy - view.offsetY) / view.scale;
 
-    // 1. Check if clicked near an edge (within 28 screen pixels)
+    // Check if clicked near an edge (within 28 screen pixels)
     const pickRadiusMetres = Math.max(28 / view.scale, 15);
     const edge = spatialIndex.nearestEdge(mx, my, pickRadiusMetres);
     if (edge) {
@@ -245,7 +264,7 @@ export const MapRenderer: React.FC<MapRendererProps> = ({
       return;
     }
 
-    // 2. Otherwise pick nearest node (within 35 screen pixels)
+    // Pick nearest node (within 35 screen pixels)
     const nodePickRadiusMetres = Math.max(35 / view.scale, 20);
     const nearestId = spatialIndex.nearestNode(mx, my);
     if (nearestId) {
@@ -261,7 +280,6 @@ export const MapRenderer: React.FC<MapRendererProps> = ({
   }, [view, spatialIndex, graph.nodes, onEdgeClick, onEdgeToggle, onNodeClick]);
 
   // ── Pre-projected Edge Path Generator in Meters ───────────────────────────
-  // Since coordinates are in meters, paths are static and GPU-transformed via <g>!
 
   const toRad = Math.PI / 180;
   const lat0 = ((graph.bbox.minLat + graph.bbox.maxLat) / 2) * toRad;
@@ -315,7 +333,6 @@ export const MapRenderer: React.FC<MapRendererProps> = ({
       const isSelected = selectedEdgeId === edge.id;
       const isHovered = hoveredEdgeId === edge.id;
 
-      // Always render blocked or selected roads; filter unblocked roads by LOD scale
       if (!isBlocked && !isSelected && !isEdgeVisibleAtScale(edge, view.scale)) {
         return null;
       }
@@ -407,7 +424,7 @@ export const MapRenderer: React.FC<MapRendererProps> = ({
     onEdgeToggle,
   ]);
 
-  // ── Render Places / Facilities with progressive LOD ────────────────────────
+  // ── Render Places / Facilities ─────────────────────────────────────────────
 
   const filteredPlaces = useMemo(() => {
     return places.filter(p => {
@@ -417,7 +434,6 @@ export const MapRenderer: React.FC<MapRendererProps> = ({
   }, [places, filterPlaceType]);
 
   const renderedPlaces = useMemo(() => {
-    // Hide facility icons if drastically zoomed out to keep viewport uncluttered
     if (view.scale < 0.22) return null;
     const showLabels = view.scale >= 0.75;
 
@@ -495,6 +511,184 @@ export const MapRenderer: React.FC<MapRendererProps> = ({
     });
   }, [filteredPlaces, graph.nodes, view.scale, hoveredPlaceId, onPlaceClick, onNodeClick]);
 
+  // ── Render Simulated Incidents (Phase 3) ───────────────────────────────────
+
+  const renderedIncidents = useMemo(() => {
+    return incidents.map(inc => {
+      const node = graph.nodes[inc.node];
+      if (!node) return null;
+
+      const conf = INCIDENT_CONFIG[inc.type] ?? { icon: '⚠️', color: '#ef4444', label: 'Incident' };
+      const isSelected = selectedIncidentId === inc.id;
+      const isHovered = hoveredIncidentId === inc.id;
+
+      return (
+        <g
+          key={inc.id}
+          transform={`translate(${node.x}, ${node.y}) scale(${1 / view.scale})`}
+          style={{ cursor: 'pointer' }}
+          onMouseEnter={() => setHoveredIncidentId(inc.id)}
+          onMouseLeave={() => setHoveredIncidentId(null)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onIncidentClick?.(inc);
+            onNodeClick?.(inc.node);
+          }}
+        >
+          {/* Pulsing outer aura */}
+          <circle
+            r={isSelected ? 18 : isHovered ? 15 : 12}
+            fill={conf.color}
+            fillOpacity={isSelected ? 0.45 : 0.25}
+            stroke={conf.color}
+            strokeWidth={isSelected ? 2.5 : 1.5}
+          />
+
+          {/* Diamond hazard marker */}
+          <polygon
+            points="0,-10 10,0 0,10 -10,0"
+            fill="#1e1b4b"
+            stroke={conf.color}
+            strokeWidth={2}
+          />
+
+          {/* Icon */}
+          <text
+            x={0}
+            y={0.5}
+            textAnchor="middle"
+            dominantBaseline="central"
+            fontSize={9}
+            style={{ userSelect: 'none', pointerEvents: 'none' }}
+          >
+            {conf.icon}
+          </text>
+
+          {/* Severity badge pill */}
+          <g transform="translate(10, -10)" style={{ pointerEvents: 'none' }}>
+            <circle r={5.5} fill="#ef4444" stroke="#ffffff" strokeWidth={1} />
+            <text
+              x={0}
+              y={0.5}
+              textAnchor="middle"
+              dominantBaseline="central"
+              fontSize={7}
+              fontWeight={800}
+              fill="#ffffff"
+            >
+              {inc.severity}
+            </text>
+          </g>
+
+          {/* Incident label */}
+          {(view.scale >= 0.7 || isSelected || isHovered) && (
+            <g transform="translate(0, -16)" style={{ pointerEvents: 'none' }}>
+              <rect
+                x={-Math.min(inc.placeName.length * 3.5 + 8, 85)}
+                y={-8}
+                width={Math.min(inc.placeName.length * 7 + 16, 170)}
+                height={16}
+                rx={3}
+                fill="rgba(239, 68, 68, 0.9)"
+                stroke="#ffffff"
+                strokeWidth={0.8}
+              />
+              <text
+                x={0}
+                y={0}
+                textAnchor="middle"
+                dominantBaseline="central"
+                fontSize={8.5}
+                fontWeight={700}
+                fill="#ffffff"
+                style={{ userSelect: 'none' }}
+              >
+                {inc.placeName.length > 22 ? inc.placeName.slice(0, 20) + '…' : inc.placeName}
+              </text>
+            </g>
+          )}
+        </g>
+      );
+    });
+  }, [incidents, graph.nodes, view.scale, selectedIncidentId, hoveredIncidentId, onIncidentClick, onNodeClick]);
+
+  // ── Render Team Depots (Phase 3) ──────────────────────────────────────────
+
+  const renderedTeams = useMemo(() => {
+    return teams.map(team => {
+      const node = graph.nodes[team.depotNode];
+      if (!node) return null;
+
+      const isSelected = selectedTeamId === team.id;
+      const isHovered = hoveredTeamId === team.id;
+
+      const vehicleIcon =
+        team.vehicleType === 'bucket-truck' ? '🚛' :
+        team.vehicleType === 'pump-van' ? '🚐' :
+        team.vehicleType === 'comms-van' ? '🚙' : '🚜';
+
+      return (
+        <g
+          key={team.id}
+          transform={`translate(${node.x}, ${node.y}) scale(${1 / view.scale})`}
+          style={{ cursor: 'pointer' }}
+          onMouseEnter={() => setHoveredTeamId(team.id)}
+          onMouseLeave={() => setHoveredTeamId(null)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onTeamClick?.(team);
+            onNodeClick?.(team.depotNode);
+          }}
+        >
+          <circle
+            r={isSelected ? 13 : 9}
+            fill="#0284c7"
+            fillOpacity={0.85}
+            stroke="#ffffff"
+            strokeWidth={isSelected ? 2 : 1}
+          />
+          <text
+            x={0}
+            y={0.5}
+            textAnchor="middle"
+            dominantBaseline="central"
+            fontSize={7}
+            style={{ userSelect: 'none', pointerEvents: 'none' }}
+          >
+            {vehicleIcon}
+          </text>
+
+          {/* Team label on hover/select */}
+          {(isHovered || isSelected) && (
+            <g transform="translate(0, 14)" style={{ pointerEvents: 'none' }}>
+              <rect
+                x={-50}
+                y={-7}
+                width={100}
+                height={14}
+                rx={3}
+                fill="rgba(2, 132, 199, 0.9)"
+                stroke="#38bdf8"
+                strokeWidth={0.8}
+              />
+              <text
+                x={0}
+                y={0}
+                textAnchor="middle"
+                dominantBaseline="central"
+                fontSize={8}
+                fontWeight={600}
+                fill="#ffffff"
+              >
+                {team.name}
+              </text>
+            </g>
+          )}
+        </g>
+      );
+    });
+  }, [teams, graph.nodes, view.scale, selectedTeamId, hoveredTeamId, onTeamClick, onNodeClick]);
+
   // ── Selected Node Highlight ───────────────────────────────────────────────
 
   const renderedSelectedNode = useMemo(() => {
@@ -516,7 +710,6 @@ export const MapRenderer: React.FC<MapRendererProps> = ({
   // ── Scale Bar (Bottom-Left) ───────────────────────────────────────────────
 
   const scaleBar = useMemo(() => {
-    // Choose appropriate scale bar length in meters
     let barMeters = 500;
     if (view.scale < 0.2) barMeters = 2000;
     else if (view.scale < 0.5) barMeters = 1000;
@@ -579,6 +772,12 @@ export const MapRenderer: React.FC<MapRendererProps> = ({
 
           {/* Real Place/Facility Markers */}
           <g id="layer-places">{renderedPlaces}</g>
+
+          {/* Team Depots */}
+          <g id="layer-teams">{renderedTeams}</g>
+
+          {/* Simulated Incidents Layer */}
+          <g id="layer-incidents">{renderedIncidents}</g>
         </g>
 
         {/* UI Overlay: Scale bar */}
@@ -661,7 +860,7 @@ export const MapRenderer: React.FC<MapRendererProps> = ({
           position: 'absolute',
           bottom: '12px',
           right: '12px',
-          background: 'rgba(15, 23, 42, 0.85)',
+          background: 'rgba(15, 23, 42, 0.9)',
           padding: '8px 12px',
           borderRadius: '6px',
           border: '1px solid rgba(255, 255, 255, 0.1)',
@@ -675,20 +874,16 @@ export const MapRenderer: React.FC<MapRendererProps> = ({
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-          <span style={{ width: '12px', height: '3px', background: '#f59e0b', borderRadius: '1px' }} />
-          <span>Major</span>
+          <span>⚡ Power</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-          <span style={{ width: '12px', height: '3px', background: '#3b82f6', borderRadius: '1px' }} />
-          <span>Primary</span>
+          <span>💧 Water</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-          <span style={{ width: '12px', height: '3px', background: '#818cf8', borderRadius: '1px' }} />
-          <span>Secondary</span>
+          <span>📡 Comms</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-          <span style={{ width: '12px', height: '3px', background: '#ef4444', borderTop: '2px dashed #ef4444' }} />
-          <span>Blocked</span>
+          <span>🚧 Road Block</span>
         </div>
       </div>
     </div>
