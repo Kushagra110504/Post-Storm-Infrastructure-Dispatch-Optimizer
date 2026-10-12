@@ -1,9 +1,9 @@
 # GridRescue: Project Context
 
 ## Current State
-- **Phase**: 4 (Routing & Simulator completed)
-- **Status**: Yen's k-shortest paths (k=3), RouteCache (memoized Dijkstra + k-routes with invalidate), timeline simulator (discrete-event, dependency-aware, skill-matched repair times, edge unblocking), and cost function J (alpha·makespan + beta·weightedRestorationDelay + gamma·unresolved) all implemented and tested.
-- **Test Count**: 58 passing unit tests across 8 test suites.
+- **Phase**: 5 (Baseline Dispatcher completed)
+- **Status**: Nearest-team-first greedy baseline dispatcher with dependency resolution, skill-match scoring, and KPI evaluation. UI has '⚡ Run Baseline' button + live KPI panel showing makespan, avg resolution, resolved count, facilities restored, weighted restoration delay, and cost J.
+- **Test Count**: 65 passing unit tests across 9 test suites.
 
 ## Key Architectural Decisions
 - **12/8/5 Scenario Generator**: Deterministic by seed (Mulberry32). Generates 4 power, 3 water, 2 comms, 3 road incidents on real Jaipur OSM places with required skill/vehicle/equipment alignments.
