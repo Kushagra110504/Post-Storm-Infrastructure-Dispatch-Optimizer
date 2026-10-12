@@ -2,11 +2,12 @@
  * Hill Climbing with Random Restarts — the core optimizer of GridRescue.
  *
  * Algorithm:
- *  1. Initialize from the baseline plan (or a random permutation on restart).
+ *  1. Initialize from the baseline plan (or a warm-start plan on replan).
  *  2. Generate neighbors via 3 move types: swap-team, swap-route, swap-order.
- *  3. Accept any neighbor that strictly improves J (steepest descent / greedy improvement HC).
- *  4. If stuck at a local optimum, perform a random restart.
- *  5. Return the best plan seen across all restarts with convergence history.
+ *  3. Support lockedIncidentIds to preserve historical/completed tasks during replanning.
+ *  4. Accept any neighbor that strictly improves J (steepest descent / greedy improvement HC).
+ *  5. If stuck at a local optimum, perform a random restart.
+ *  6. Return the best plan seen across all restarts with convergence history.
  *
  * The algorithm is parameterized, seedable, and deterministic.
  */
@@ -33,6 +34,10 @@ export interface HillClimbOptions {
   onProgress?: (progress: HillClimbProgress) => void;
   /** Optional cancellation token callback. */
   shouldStop?: () => boolean;
+  /** Incident IDs that cannot be mutated (e.g. already completed during mid-op replanning). */
+  lockedIncidentIds?: Set<string>;
+  /** Initial starting plan for warm start. If provided, restart 0 starts from this plan instead of nearest-first baseline. */
+  initialPlan?: DispatchPlan;
 }
 
 export const DEFAULT_HC_OPTIONS: HillClimbOptions = {
@@ -87,10 +92,13 @@ export function hillClimb(
   };
   const weights = mergedOpts.weights ?? DEFAULT_WEIGHTS;
   const rng = createMulberry32(mergedOpts.seed);
+  const locked = mergedOpts.lockedIncidentIds;
 
-  // --- 1. Evaluate baseline ---
+  // --- 1. Evaluate baseline or warm-start plan ---
   const baseCache = new RouteCache(graph);
-  const basePlan = nearestFirstBaseline(scenario, graph, baseCache);
+  const basePlan = mergedOpts.initialPlan
+    ? clonePlan(mergedOpts.initialPlan)
+    : nearestFirstBaseline(scenario, graph, baseCache);
   const baseSimResult = simulate(basePlan, scenario, graph, new RouteCache(graph));
   const baselineJ = evaluateCost(baseSimResult, scenario, weights);
 
@@ -108,7 +116,7 @@ export function hillClimb(
     let currentPlan =
       restart === 0
         ? clonePlan(basePlan)
-        : randomizePlan(basePlan, scenario, rng);
+        : randomizePlan(basePlan, scenario, rng, locked);
 
     const restartCache = new RouteCache(graph);
     let currentResult = simulate(currentPlan, scenario, graph, restartCache);
@@ -126,8 +134,8 @@ export function hillClimb(
       if (mergedOpts.shouldStop?.()) break;
       totalIterations++;
 
-      // Generate neighbors
-      const neighbors = generateNeighbors(currentPlan, scenario, mergedOpts.neighborsPerStep, rng);
+      // Generate neighbors respecting locked tasks
+      const neighbors = generateNeighbors(currentPlan, scenario, mergedOpts.neighborsPerStep, rng, locked);
 
       let bestNeighborPlan: DispatchPlan | null = null;
       let bestNeighborResult: SimulationResult | null = null;
@@ -199,10 +207,11 @@ export function generateNeighbors(
   plan: DispatchPlan,
   scenario: Scenario,
   count: number,
-  rng: RNG
+  rng: RNG,
+  lockedIncidentIds?: Set<string>
 ): DispatchPlan[] {
   const neighbors: DispatchPlan[] = [];
-  const moves: Array<(p: DispatchPlan, s: Scenario, r: RNG) => DispatchPlan | null> = [
+  const moves: Array<(p: DispatchPlan, s: Scenario, r: RNG, locked?: Set<string>) => DispatchPlan | null> = [
     swapTeamMove,
     swapRouteMove,
     swapOrderMove,
@@ -210,7 +219,7 @@ export function generateNeighbors(
 
   for (let i = 0; i < count; i++) {
     const move = moves[Math.floor(rng() * moves.length)]!;
-    const neighbor = move(plan, scenario, rng);
+    const neighbor = move(plan, scenario, rng, lockedIncidentIds);
     if (neighbor) {
       neighbors.push(neighbor);
     }
@@ -220,10 +229,22 @@ export function generateNeighbors(
 }
 
 /** Move 1: Reassign one incident to a different team in the scenario. */
-export function swapTeamMove(plan: DispatchPlan, scenario: Scenario, rng: RNG): DispatchPlan | null {
-  if (plan.assignments.length === 0 || scenario.teams.length < 2) return null;
+export function swapTeamMove(
+  plan: DispatchPlan,
+  scenario: Scenario,
+  rng: RNG,
+  lockedIncidentIds?: Set<string>
+): DispatchPlan | null {
+  const eligibleIndices: number[] = [];
+  for (let idx = 0; idx < plan.assignments.length; idx++) {
+    if (!lockedIncidentIds?.has(plan.assignments[idx]!.incidentId)) {
+      eligibleIndices.push(idx);
+    }
+  }
+  if (eligibleIndices.length === 0 || scenario.teams.length < 2) return null;
+
   const newAssignments = plan.assignments.map((a) => ({ ...a }));
-  const idx = Math.floor(rng() * newAssignments.length);
+  const idx = eligibleIndices[Math.floor(rng() * eligibleIndices.length)]!;
   const assignment = newAssignments[idx]!;
 
   const otherTeams = scenario.teams.filter((t) => t.id !== assignment.teamId);
@@ -240,13 +261,24 @@ export function swapTeamMove(plan: DispatchPlan, scenario: Scenario, rng: RNG): 
 }
 
 /** Move 2: Pick an alternative k-route (routeIndex 0, 1, or 2) for an assignment. */
-export function swapRouteMove(plan: DispatchPlan, _scenario: Scenario, rng: RNG): DispatchPlan | null {
-  if (plan.assignments.length === 0) return null;
+export function swapRouteMove(
+  plan: DispatchPlan,
+  _scenario: Scenario,
+  rng: RNG,
+  lockedIncidentIds?: Set<string>
+): DispatchPlan | null {
+  const eligibleIndices: number[] = [];
+  for (let idx = 0; idx < plan.assignments.length; idx++) {
+    if (!lockedIncidentIds?.has(plan.assignments[idx]!.incidentId)) {
+      eligibleIndices.push(idx);
+    }
+  }
+  if (eligibleIndices.length === 0) return null;
+
   const newAssignments = plan.assignments.map((a) => ({ ...a }));
-  const idx = Math.floor(rng() * newAssignments.length);
+  const idx = eligibleIndices[Math.floor(rng() * eligibleIndices.length)]!;
   const assignment = newAssignments[idx]!;
 
-  // Choose a different routeIndex among 0, 1, 2
   const candidateIndices = [0, 1, 2].filter((r) => r !== assignment.routeIndex);
   const newRouteIndex = candidateIndices[Math.floor(rng() * candidateIndices.length)] ?? 0;
   newAssignments[idx] = { ...assignment, routeIndex: newRouteIndex };
@@ -258,17 +290,28 @@ export function swapRouteMove(plan: DispatchPlan, _scenario: Scenario, rng: RNG)
   };
 }
 
-/** Move 3: Swap assignment execution ordering between two incidents. */
-export function swapOrderMove(plan: DispatchPlan, _scenario: Scenario, rng: RNG): DispatchPlan | null {
-  if (plan.assignments.length < 2) return null;
+/** Move 3: Swap assignment execution ordering between two unlocked incidents. */
+export function swapOrderMove(
+  plan: DispatchPlan,
+  _scenario: Scenario,
+  rng: RNG,
+  lockedIncidentIds?: Set<string>
+): DispatchPlan | null {
+  const eligibleIndices: number[] = [];
+  for (let idx = 0; idx < plan.assignments.length; idx++) {
+    if (!lockedIncidentIds?.has(plan.assignments[idx]!.incidentId)) {
+      eligibleIndices.push(idx);
+    }
+  }
+  if (eligibleIndices.length < 2) return null;
+
   const newAssignments = plan.assignments.map((a) => ({ ...a }));
-  const i = Math.floor(rng() * newAssignments.length);
-  let j = Math.floor(rng() * newAssignments.length);
+  const i = eligibleIndices[Math.floor(rng() * eligibleIndices.length)]!;
+  let j = eligibleIndices[Math.floor(rng() * eligibleIndices.length)]!;
   while (j === i) {
-    j = Math.floor(rng() * newAssignments.length);
+    j = eligibleIndices[Math.floor(rng() * eligibleIndices.length)]!;
   }
 
-  // Swap positions in assignment schedule
   const temp = newAssignments[i]!;
   newAssignments[i] = newAssignments[j]!;
   newAssignments[j] = temp;
@@ -291,27 +334,25 @@ function clonePlan(plan: DispatchPlan): DispatchPlan {
 
 /**
  * Create a shuffled variant of a plan for random restarts.
- * Reassigns incidents across available teams with diverse route choices.
+ * Preserves locked assignments without mutation.
  */
 function randomizePlan(
   basePlan: DispatchPlan,
   scenario: Scenario,
-  rng: RNG
+  rng: RNG,
+  lockedIncidentIds?: Set<string>
 ): DispatchPlan {
   const teamIds = scenario.teams.map((t) => t.id);
-  const newAssignments: Assignment[] = basePlan.assignments.map((a) => ({
-    ...a,
-    teamId: teamIds[Math.floor(rng() * teamIds.length)]!,
-    routeIndex: Math.floor(rng() * 3),
-  }));
-
-  // Also randomly shuffle assignment ordering
-  for (let i = newAssignments.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1));
-    const tmp = newAssignments[i]!;
-    newAssignments[i] = newAssignments[j]!;
-    newAssignments[j] = tmp;
-  }
+  const newAssignments: Assignment[] = basePlan.assignments.map((a) => {
+    if (lockedIncidentIds?.has(a.incidentId)) {
+      return { ...a };
+    }
+    return {
+      ...a,
+      teamId: teamIds[Math.floor(rng() * teamIds.length)]!,
+      routeIndex: Math.floor(rng() * 3),
+    };
+  });
 
   return {
     ...basePlan,

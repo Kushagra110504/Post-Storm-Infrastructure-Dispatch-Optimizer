@@ -10,6 +10,10 @@ import { evaluateCost } from './core/cost/costFunction';
 import { computeKPIs, KPIs } from './core/baseline/kpi';
 import { RouteCache } from './core/routing/routeCache';
 import { SimulationResult } from './core/plan/types';
+import { ExplainPanel } from './ui/ExplainPanel';
+import { dynamicReplan } from './core/replan/replanner';
+import { PlanDiffExplanation } from './core/explain/explainer';
+import { Incident, Scenario } from './core/model/schema';
 import { OptimizerRunner } from './workers/optimizerClient';
 import { HillClimbProgress, HillClimbResult } from './core/hillclimb/hillClimb';
 
@@ -32,6 +36,7 @@ export const App: React.FC = () => {
     generateAndLoadScenario,
     loadScenario,
     toggleEdgeBlock,
+    setEdgeBlocked,
     clearBlockedEdges,
     selectNode,
     selectEdge,
@@ -60,6 +65,11 @@ export const App: React.FC = () => {
   const [hillClimbResult, setHillClimbResult] = useState<HillClimbResult | null>(null);
   const [hillClimbKPIs, setHillClimbKPIs] = useState<KPIs | null>(null);
   const [activePlanView, setActivePlanView] = useState<'baseline' | 'hillclimb'>('baseline');
+
+  // Dynamic replanning and explainability state
+  const [explanation, setExplanation] = useState<PlanDiffExplanation | null>(null);
+  const [showExplainPanel, setShowExplainPanel] = useState(false);
+  const [isReplanRunning, setIsReplanRunning] = useState(false);
 
   // Initialize map data once on mount
   useEffect(() => {
@@ -254,13 +264,233 @@ export const App: React.FC = () => {
     setTimeout(() => setStatusMessage(null), 3000);
   };
 
+  // Dynamic replanning disruption injection handlers
+  const handleInjectHospitalFault = () => {
+    if (!scenario || !graph) return;
+    setIsReplanRunning(true);
+    setStatusMessage('🚨 Emergency Disruption: Hospital Transformer Failure reported! Replanning...');
+
+    // Locate hospital facility node
+    const hospital = scenario.facilities.find((f) => f.type === 'hospital') ?? scenario.facilities[0];
+    const targetNode = hospital?.node ?? Object.keys(graph.nodes)[0]!;
+
+    const newIncident: Incident = {
+      id: `I-EMERGENCY-${Date.now().toString().slice(-4)}`,
+      type: 'power',
+      node: targetNode,
+      placeName: `${hospital?.name ?? 'Hospital'} Emergency Substation Surge`,
+      severity: 5,
+      requiredSkill: 'high-voltage',
+      requiredEquipment: 'generator',
+      baseRepairTime: 25,
+      affectedFacilityIds: hospital ? [hospital.id] : [],
+      reportedAt: 12,
+    };
+
+    const updatedScenario: Scenario = {
+      ...scenario,
+      incidents: [newIncident, ...scenario.incidents],
+    };
+
+    const activePlan =
+      activePlanView === 'hillclimb' && hillClimbResult
+        ? hillClimbResult.bestPlan
+        : baselineResult
+        ? nearestFirstBaseline(scenario, graph, new RouteCache(graph))
+        : nearestFirstBaseline(scenario, graph, new RouteCache(graph));
+
+    const activeSim =
+      activePlanView === 'hillclimb' && hillClimbResult
+        ? hillClimbResult.bestSimResult
+        : baselineResult ?? simulate(activePlan, scenario, graph, new RouteCache(graph));
+
+    setTimeout(() => {
+      try {
+        const replanResult = dynamicReplan(
+          updatedScenario,
+          graph,
+          activePlan,
+          activeSim,
+          12,
+          'Critical hospital transformer explosion reported at t=12m requiring emergency crew redirect'
+        );
+
+        loadScenario(updatedScenario);
+        const kpis = computeKPIs(replanResult.newSimResult, updatedScenario);
+        setHillClimbResult({
+          bestPlan: replanResult.newPlan,
+          bestSimResult: replanResult.newSimResult,
+          baselineCostJ: activeSim.costJ,
+          bestCostJ: replanResult.newCostJ,
+          convergence: [{ iteration: 0, restart: 0, costJ: replanResult.newCostJ }],
+          totalIterations: 1,
+          improvementPct: 0,
+        });
+        setHillClimbKPIs(kpis);
+        setActivePlanView('hillclimb');
+        setExplanation(replanResult.explanation);
+        setShowExplainPanel(true);
+        setStatusMessage(`Replanned successfully: J=${replanResult.newCostJ.toFixed(1)}`);
+      } catch (e) {
+        console.error('Replanning error:', e);
+        setStatusMessage('Dynamic replanning failed');
+      } finally {
+        setIsReplanRunning(false);
+        setTimeout(() => setStatusMessage(null), 5000);
+      }
+    }, 50);
+  };
+
+  const handleInjectRoadBlockage = () => {
+    if (!scenario || !graph) return;
+    setIsReplanRunning(true);
+    setStatusMessage('🚧 Disruption: Major arterial road blocked by debris! Calculating detours...');
+
+    const candidateEdge =
+      graph.edges.find(
+        (e) => !blockedEdgeIds.has(e.id) && (e.highwayType === 'primary' || e.highwayType === 'secondary')
+      ) ?? graph.edges[0];
+
+    if (!candidateEdge) {
+      setIsReplanRunning(false);
+      return;
+    }
+
+    setEdgeBlocked(candidateEdge.id, true);
+
+    const activePlan =
+      activePlanView === 'hillclimb' && hillClimbResult
+        ? hillClimbResult.bestPlan
+        : baselineResult
+        ? nearestFirstBaseline(scenario, graph, new RouteCache(graph))
+        : nearestFirstBaseline(scenario, graph, new RouteCache(graph));
+
+    const activeSim =
+      activePlanView === 'hillclimb' && hillClimbResult
+        ? hillClimbResult.bestSimResult
+        : baselineResult ?? simulate(activePlan, scenario, graph, new RouteCache(graph));
+
+    setTimeout(() => {
+      try {
+        const replanResult = dynamicReplan(
+          scenario,
+          graph,
+          activePlan,
+          activeSim,
+          10,
+          `Arterial route segment "${candidateEdge.name || candidateEdge.id}" blocked by fallen tree`
+        );
+
+        const kpis = computeKPIs(replanResult.newSimResult, scenario);
+        setHillClimbResult({
+          bestPlan: replanResult.newPlan,
+          bestSimResult: replanResult.newSimResult,
+          baselineCostJ: activeSim.costJ,
+          bestCostJ: replanResult.newCostJ,
+          convergence: [{ iteration: 0, restart: 0, costJ: replanResult.newCostJ }],
+          totalIterations: 1,
+          improvementPct: 0,
+        });
+        setHillClimbKPIs(kpis);
+        setActivePlanView('hillclimb');
+        setExplanation(replanResult.explanation);
+        setShowExplainPanel(true);
+        setStatusMessage(`Rerouted around blockage: J=${replanResult.newCostJ.toFixed(1)}`);
+      } catch (e) {
+        console.error('Replanning error:', e);
+        setStatusMessage('Dynamic rerouting failed');
+      } finally {
+        setIsReplanRunning(false);
+        setTimeout(() => setStatusMessage(null), 5000);
+      }
+    }, 50);
+  };
+
+  const handleInjectWaterFailure = () => {
+    if (!scenario || !graph) return;
+    setIsReplanRunning(true);
+    setStatusMessage('💧 Disruption: Water Pumping Station main break! Replanning...');
+
+    const waterFac =
+      scenario.facilities.find((f) => f.type === 'water_facility') ??
+      scenario.facilities[1] ??
+      scenario.facilities[0];
+    const targetNode = waterFac?.node ?? Object.keys(graph.nodes)[1]!;
+
+    const newIncident: Incident = {
+      id: `I-WATER-BURST-${Date.now().toString().slice(-4)}`,
+      type: 'water',
+      node: targetNode,
+      placeName: `${waterFac?.name ?? 'Civic'} Water Main Rupture`,
+      severity: 4,
+      requiredSkill: 'pipe-repair',
+      requiredEquipment: 'excavator',
+      baseRepairTime: 35,
+      affectedFacilityIds: waterFac ? [waterFac.id] : [],
+      reportedAt: 15,
+    };
+
+    const updatedScenario: Scenario = {
+      ...scenario,
+      incidents: [newIncident, ...scenario.incidents],
+    };
+
+    const activePlan =
+      activePlanView === 'hillclimb' && hillClimbResult
+        ? hillClimbResult.bestPlan
+        : baselineResult
+        ? nearestFirstBaseline(scenario, graph, new RouteCache(graph))
+        : nearestFirstBaseline(scenario, graph, new RouteCache(graph));
+
+    const activeSim =
+      activePlanView === 'hillclimb' && hillClimbResult
+        ? hillClimbResult.bestSimResult
+        : baselineResult ?? simulate(activePlan, scenario, graph, new RouteCache(graph));
+
+    setTimeout(() => {
+      try {
+        const replanResult = dynamicReplan(
+          updatedScenario,
+          graph,
+          activePlan,
+          activeSim,
+          15,
+          'Major water distribution main burst requiring excavation equipment'
+        );
+
+        loadScenario(updatedScenario);
+        const kpis = computeKPIs(replanResult.newSimResult, updatedScenario);
+        setHillClimbResult({
+          bestPlan: replanResult.newPlan,
+          bestSimResult: replanResult.newSimResult,
+          baselineCostJ: activeSim.costJ,
+          bestCostJ: replanResult.newCostJ,
+          convergence: [{ iteration: 0, restart: 0, costJ: replanResult.newCostJ }],
+          totalIterations: 1,
+          improvementPct: 0,
+        });
+        setHillClimbKPIs(kpis);
+        setActivePlanView('hillclimb');
+        setExplanation(replanResult.explanation);
+        setShowExplainPanel(true);
+        setStatusMessage(`Replanned successfully for water burst: J=${replanResult.newCostJ.toFixed(1)}`);
+      } catch (e) {
+        console.error('Replanning error:', e);
+        setStatusMessage('Replanning failed');
+      } finally {
+        setIsReplanRunning(false);
+        setTimeout(() => setStatusMessage(null), 5000);
+      }
+    }, 50);
+  };
+
   return (
     <div className="app-container">
       {/* Header */}
       <header className="app-header">
         <div className="logo-group">
           <h1>GridRescue</h1>
-          <span className="badge-phase">Phase 6: Hill Climbing Worker</span>
+          <span className="badge-phase">Phase 7: Dynamic Replanning</span>
           <span className="badge-sim">Jaipur, RJ &bull; Real OSM Road Network</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -388,6 +618,20 @@ export const App: React.FC = () => {
               {showKpiPanel ? 'Hide Benchmark' : 'Show Benchmark'}
             </button>
           )}
+
+          <button
+            onClick={() => setShowExplainPanel((p) => !p)}
+            className="btn-action btn-secondary"
+            style={{
+              padding: '0.25rem 0.5rem',
+              fontSize: '0.75rem',
+              color: '#f59e0b',
+              border: '1px solid rgba(245, 158, 11, 0.4)',
+            }}
+            title="Toggle dynamic replanning and disruption explainability panel"
+          >
+            {showExplainPanel ? 'Hide Replanner' : '🔄 Replanning & Explain'}
+          </button>
         </div>
       </header>
 
@@ -425,6 +669,18 @@ export const App: React.FC = () => {
           activePlanView={activePlanView}
           onSelectPlanView={(view) => setActivePlanView(view)}
           onClose={() => setShowKpiPanel(false)}
+        />
+      )}
+
+      {/* Dynamic Replanning & Explainability Panel */}
+      {showExplainPanel && (
+        <ExplainPanel
+          explanation={explanation}
+          onInjectHospitalFault={handleInjectHospitalFault}
+          onInjectRoadBlockage={handleInjectRoadBlockage}
+          onInjectWaterFailure={handleInjectWaterFailure}
+          onClose={() => setShowExplainPanel(false)}
+          isReplanRunning={isReplanRunning}
         />
       )}
       <main className="app-main">
@@ -1100,7 +1356,7 @@ export const App: React.FC = () => {
       {/* Footer */}
       <footer className="app-footer">
         <div>
-          GridRescue &bull; Phase 6 Hill Climbing Optimizer & Worker &bull; Jaipur Infrastructure Control Room
+          GridRescue &bull; Phase 7 Dynamic Replanning & Explainability &bull; Jaipur Infrastructure Control Room
         </div>
         <div style={{ display: 'flex', gap: '1rem', color: 'var(--text-muted)' }}>
           <span>12 Incidents (4 Power, 3 Water, 2 Comms, 3 Road)</span>
