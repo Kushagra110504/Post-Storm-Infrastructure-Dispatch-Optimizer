@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { getMapData } from './data/loader';
 import { useAppStore } from './state/store';
 import { MapRenderer, INCIDENT_CONFIG } from './ui/MapRenderer';
+import { ComparisonTable } from './ui/ComparisonTable';
 import { exportScenario, importScenario } from './core/scenario/io';
 import { nearestFirstBaseline } from './core/baseline/nearestFirst';
 import { simulate } from './core/plan/simulator';
@@ -9,6 +10,8 @@ import { evaluateCost } from './core/cost/costFunction';
 import { computeKPIs, KPIs } from './core/baseline/kpi';
 import { RouteCache } from './core/routing/routeCache';
 import { SimulationResult } from './core/plan/types';
+import { OptimizerRunner } from './workers/optimizerClient';
+import { HillClimbProgress, HillClimbResult } from './core/hillclimb/hillClimb';
 
 export const App: React.FC = () => {
   const {
@@ -41,7 +44,7 @@ export const App: React.FC = () => {
   const [mapSize, setMapSize] = useState({ width: 920, height: 650 });
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [inputSeed, setInputSeed] = useState<string>('42');
-  const [activeTab, setActiveTab] = useState<'incidents' | 'facilities' | 'teams' | 'roads'>('incidents');
+  const [activeTab, setActiveTab] = useState<'incidents' | 'facilities' | 'teams' | 'roads' | 'dispatch'>('incidents');
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [importText, setImportText] = useState('');
   const [importError, setImportError] = useState<string | null>(null);
@@ -49,6 +52,14 @@ export const App: React.FC = () => {
   const [baselineKPIs, setBaselineKPIs] = useState<KPIs | null>(null);
   const [showKpiPanel, setShowKpiPanel] = useState(false);
   const [baselineRunning, setBaselineRunning] = useState(false);
+
+  // Hill Climbing Optimizer state
+  const optimizerRunner = useRef<OptimizerRunner>(new OptimizerRunner());
+  const [isOptimizing, setIsOptimizing] = useState(false);
+  const [optimizerProgress, setOptimizerProgress] = useState<HillClimbProgress | null>(null);
+  const [hillClimbResult, setHillClimbResult] = useState<HillClimbResult | null>(null);
+  const [hillClimbKPIs, setHillClimbKPIs] = useState<KPIs | null>(null);
+  const [activePlanView, setActivePlanView] = useState<'baseline' | 'hillclimb'>('baseline');
 
   // Initialize map data once on mount
   useEffect(() => {
@@ -180,6 +191,68 @@ export const App: React.FC = () => {
     }
   };
 
+  // Run Hill Climbing optimizer in background Web Worker
+  const handleRunOptimizer = () => {
+    if (!scenario || !graph) return;
+
+    // Run baseline first if not already present, to provide a benchmark
+    if (!baselineResult) {
+      try {
+        const cache = new RouteCache(graph);
+        const plan = nearestFirstBaseline(scenario, graph, cache);
+        const sim = simulate(plan, scenario, graph, new RouteCache(graph));
+        evaluateCost(sim, scenario);
+        const kpis = computeKPIs(sim, scenario);
+        setBaselineResult(sim);
+        setBaselineKPIs(kpis);
+      } catch (e) {
+        console.warn('Auto baseline run error:', e);
+      }
+    }
+
+    setIsOptimizing(true);
+    setOptimizerProgress(null);
+    setShowKpiPanel(true);
+    setStatusMessage('Hill Climbing Optimizer running in background Web Worker...');
+
+    optimizerRunner.current.start(
+      scenario,
+      graph,
+      {
+        maxRestarts: 3,
+        maxIterationsPerRestart: 35,
+        neighborsPerStep: 6,
+        seed: scenario.seed,
+      },
+      {
+        onProgress: (p) => {
+          setOptimizerProgress(p);
+        },
+        onDone: (result) => {
+          setIsOptimizing(false);
+          setHillClimbResult(result);
+          const kpis = computeKPIs(result.bestSimResult, scenario);
+          setHillClimbKPIs(kpis);
+          setActivePlanView('hillclimb');
+          const imp = result.improvementPct.toFixed(1);
+          setStatusMessage(`Hill Climbing complete! Best J=${result.bestCostJ.toFixed(1)} (${imp}% improvement)`);
+          setTimeout(() => setStatusMessage(null), 5000);
+        },
+        onError: (err) => {
+          setIsOptimizing(false);
+          setStatusMessage(`Optimizer error: ${err.message}`);
+          setTimeout(() => setStatusMessage(null), 5000);
+        },
+      }
+    );
+  };
+
+  const handleStopOptimizer = () => {
+    optimizerRunner.current.stop();
+    setIsOptimizing(false);
+    setStatusMessage('Hill Climbing optimizer paused by operator');
+    setTimeout(() => setStatusMessage(null), 3000);
+  };
 
   return (
     <div className="app-container">
@@ -187,7 +260,7 @@ export const App: React.FC = () => {
       <header className="app-header">
         <div className="logo-group">
           <h1>GridRescue</h1>
-          <span className="badge-phase">Phase 5: Baseline Dispatcher</span>
+          <span className="badge-phase">Phase 6: Hill Climbing Worker</span>
           <span className="badge-sim">Jaipur, RJ &bull; Real OSM Road Network</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -256,7 +329,7 @@ export const App: React.FC = () => {
           </button>
           <button
             onClick={handleRunBaseline}
-            disabled={!scenario || baselineRunning}
+            disabled={!scenario || baselineRunning || isOptimizing}
             className="btn-action"
             style={{
               padding: '0.25rem 0.7rem',
@@ -265,19 +338,54 @@ export const App: React.FC = () => {
               color: '#0f172a',
               fontWeight: 700,
               border: 'none',
-              cursor: scenario && !baselineRunning ? 'pointer' : 'not-allowed',
+              cursor: scenario && !baselineRunning && !isOptimizing ? 'pointer' : 'not-allowed',
             }}
             title="Run nearest-team-first baseline dispatcher"
           >
             {baselineRunning ? 'Running…' : '⚡ Run Baseline'}
           </button>
-          {baselineKPIs && (
+
+          {isOptimizing ? (
             <button
-              onClick={() => setShowKpiPanel(p => !p)}
+              onClick={handleStopOptimizer}
+              className="btn-action btn-danger"
+              style={{
+                padding: '0.25rem 0.7rem',
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                border: 'none',
+              }}
+              title="Stop Hill Climbing optimization"
+            >
+              ⏹️ Stop Optimizer
+            </button>
+          ) : (
+            <button
+              onClick={handleRunOptimizer}
+              disabled={!scenario || isOptimizing || baselineRunning}
+              className="btn-action"
+              style={{
+                padding: '0.25rem 0.7rem',
+                fontSize: '0.75rem',
+                background: 'linear-gradient(135deg, #10b981, #059669)',
+                color: '#f8fafc',
+                fontWeight: 700,
+                border: 'none',
+                cursor: scenario && !baselineRunning ? 'pointer' : 'not-allowed',
+              }}
+              title="Run Hill Climbing optimizer with random restarts in background Web Worker"
+            >
+              ⛰️ Run Optimizer
+            </button>
+          )}
+
+          {(baselineKPIs || hillClimbKPIs || isOptimizing) && (
+            <button
+              onClick={() => setShowKpiPanel((p) => !p)}
               className="btn-action btn-secondary"
               style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
             >
-              {showKpiPanel ? 'Hide KPIs' : 'Show KPIs'}
+              {showKpiPanel ? 'Hide Benchmark' : 'Show Benchmark'}
             </button>
           )}
         </div>
@@ -305,45 +413,19 @@ export const App: React.FC = () => {
       </div>
 
       {/* Main Layout */}
-      {/* KPI Panel — shown after baseline run */}
-      {showKpiPanel && baselineKPIs && baselineResult && (
-        <div style={{
-          background: 'linear-gradient(135deg, rgba(15,23,42,0.97), rgba(30,41,59,0.97))',
-          borderBottom: '1px solid rgba(245,158,11,0.3)',
-          padding: '0.75rem 1.5rem',
-          display: 'flex',
-          gap: '2rem',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          fontSize: '0.8rem',
-        }}>
-          <span style={{ color: '#94a3b8', fontWeight: 600, fontSize: '0.75rem', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-            Baseline KPIs
-          </span>
-          {[
-            { label: 'Makespan', value: `${baselineKPIs.makespanMinutes.toFixed(1)} min`, color: '#60a5fa' },
-            { label: 'Avg Resolution', value: `${baselineKPIs.avgResolutionTimeMinutes.toFixed(1)} min`, color: '#34d399' },
-            { label: 'Resolved', value: `${baselineKPIs.resolvedCount}/${baselineKPIs.resolvedCount + baselineKPIs.unresolvedCount}`, color: '#a78bfa' },
-            { label: 'Facilities', value: `${baselineKPIs.facilitiesRestored}/${baselineKPIs.totalFacilities}`, color: '#f472b6' },
-            { label: 'Wt. Restore', value: baselineKPIs.weightedRestorationDelay.toFixed(1), color: '#fbbf24' },
-            { label: 'Cost J', value: baselineKPIs.costJ.toFixed(1), color: '#f87171' },
-          ].map(({ label, value, color }) => (
-            <div key={label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.1rem' }}>
-              <span style={{ color, fontWeight: 700, fontSize: '1rem' }}>{value}</span>
-              <span style={{ color: '#64748b', fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</span>
-            </div>
-          ))}
-          <div style={{ marginLeft: 'auto', display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
-            {baselineResult.events.slice(0, 4).map((e, i) => (
-              <span key={i} style={{ color: '#94a3b8', fontSize: '0.7rem' }}>
-                t={e.timeMinutes.toFixed(1)}m — {e.message}
-              </span>
-            ))}
-            {baselineResult.events.length > 4 && (
-              <span style={{ color: '#475569', fontSize: '0.65rem' }}>+{baselineResult.events.length - 4} more events…</span>
-            )}
-          </div>
-        </div>
+      {/* Benchmark & Comparison Panel */}
+      {showKpiPanel && (
+        <ComparisonTable
+          baselineKPIs={baselineKPIs}
+          baselineResult={baselineResult}
+          hillClimbResult={hillClimbResult}
+          hillClimbKPIs={hillClimbKPIs}
+          isOptimizing={isOptimizing}
+          currentProgress={optimizerProgress}
+          activePlanView={activePlanView}
+          onSelectPlanView={(view) => setActivePlanView(view)}
+          onClose={() => setShowKpiPanel(false)}
+        />
       )}
       <main className="app-main">
         <div className="control-room-layout">
@@ -417,6 +499,13 @@ export const App: React.FC = () => {
                 style={{ flex: 1, justifyContent: 'center' }}
               >
                 Roads ({blockedEdgeIds.size})
+              </button>
+              <button
+                onClick={() => setActiveTab('dispatch')}
+                className={`pill-btn ${activeTab === 'dispatch' ? 'active' : ''}`}
+                style={{ flex: 1, justifyContent: 'center' }}
+              >
+                Dispatch {activePlanView === 'hillclimb' ? '⛰️' : '⚡'}
               </button>
             </div>
 
@@ -765,6 +854,165 @@ export const App: React.FC = () => {
                 )}
               </div>
             )}
+
+            {/* TAB: Dispatch Schedule */}
+            {activeTab === 'dispatch' && (
+              <div className="card" style={{ flex: 1, overflowY: 'auto', maxHeight: '560px' }}>
+                <div className="card-title">
+                  <span>
+                    {activePlanView === 'hillclimb' ? '⛰️ Hill Climbing Plan' : '⚡ Baseline Plan'}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: '0.7rem',
+                      color: activePlanView === 'hillclimb' ? '#34d399' : '#60a5fa',
+                      fontWeight: 600,
+                    }}
+                  >
+                    {activePlanView === 'hillclimb'
+                      ? (hillClimbResult ? `J=${hillClimbResult.bestCostJ.toFixed(1)}` : 'IN PROGRESS')
+                      : (baselineResult ? `J=${baselineResult.costJ.toFixed(1)}` : 'NOT RUN')}
+                  </span>
+                </div>
+
+                {(() => {
+                  const currentPlan =
+                    activePlanView === 'hillclimb'
+                      ? (hillClimbResult?.bestPlan ?? null)
+                      : (baselineResult && scenario && graph ? nearestFirstBaseline(scenario, graph, new RouteCache(graph)) : null);
+                  const currentSim =
+                    activePlanView === 'hillclimb'
+                      ? (hillClimbResult?.bestSimResult ?? null)
+                      : baselineResult;
+
+                  if (!currentSim || !currentPlan) {
+                    return (
+                      <div style={{ fontSize: '0.8rem', color: '#94a3b8', padding: '1rem', textAlign: 'center' }}>
+                        No dispatch schedule calculated for {activePlanView === 'hillclimb' ? 'Hill Climbing' : 'Baseline'}.
+                        <div style={{ marginTop: '0.75rem' }}>
+                          <button
+                            onClick={activePlanView === 'hillclimb' ? handleRunOptimizer : handleRunBaseline}
+                            className="btn-action"
+                            style={{ fontSize: '0.75rem' }}
+                          >
+                            {activePlanView === 'hillclimb' ? '⛰️ Run Optimizer' : '⚡ Run Baseline'}
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                      <div
+                        style={{
+                          background: '#0f172a',
+                          padding: '0.5rem 0.75rem',
+                          borderRadius: '6px',
+                          border: '1px solid #1e293b',
+                          fontSize: '0.75rem',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                        }}
+                      >
+                        <span style={{ color: '#94a3b8' }}>
+                          {currentPlan.assignments.length} Crew Assignments
+                        </span>
+                        <span style={{ color: '#38bdf8', fontWeight: 600 }}>
+                          {currentSim.events.length} Timeline Events
+                        </span>
+                      </div>
+
+                      {/* Crew Assignment List */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                        <span style={{ fontSize: '0.7rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>
+                          Crew Dispatches
+                        </span>
+                        {currentPlan.assignments.map((assignment, idx) => {
+                          const incident = scenario?.incidents.find((i) => i.id === assignment.incidentId);
+                          const team = scenario?.teams.find((t) => t.id === assignment.teamId);
+                          const isIncSelected = selectedIncidentId === incident?.id;
+
+                          return (
+                            <div
+                              key={idx}
+                              onClick={() => {
+                                if (incident) {
+                                  selectIncident(incident.id);
+                                  selectNode(incident.node);
+                                }
+                              }}
+                              style={{
+                                padding: '0.45rem 0.6rem',
+                                background: isIncSelected ? 'rgba(56, 189, 248, 0.15)' : '#0f172a',
+                                border: isIncSelected ? '1px solid #38bdf8' : '1px solid #1e293b',
+                                borderRadius: '6px',
+                                cursor: 'pointer',
+                                fontSize: '0.75rem',
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                              }}
+                            >
+                              <div>
+                                <div style={{ fontWeight: 600, color: '#f8fafc' }}>
+                                  {team?.name ?? assignment.teamId} → {incident?.placeName ?? assignment.incidentId}
+                                </div>
+                                <div style={{ fontSize: '0.68rem', color: '#94a3b8' }}>
+                                  Route Alt #{assignment.routeIndex + 1} &bull; {incident?.requiredSkill}
+                                </div>
+                              </div>
+                              <span
+                                style={{
+                                  fontSize: '0.68rem',
+                                  padding: '0.1rem 0.35rem',
+                                  borderRadius: '3px',
+                                  background: 'rgba(56, 189, 248, 0.1)',
+                                  color: '#38bdf8',
+                                }}
+                              >
+                                #{idx + 1}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {/* Event Log Stream */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', marginTop: '0.5rem' }}>
+                        <span style={{ fontSize: '0.7rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>
+                          Timeline Log ({currentSim.events.length} Events)
+                        </span>
+                        <div
+                          style={{
+                            maxHeight: '180px',
+                            overflowY: 'auto',
+                            background: '#020617',
+                            padding: '0.4rem',
+                            borderRadius: '4px',
+                            border: '1px solid #1e293b',
+                            fontSize: '0.7rem',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '0.2rem',
+                          }}
+                        >
+                          {currentSim.events.map((evt, i) => (
+                            <div key={i} style={{ color: '#94a3b8', lineHeight: 1.3 }}>
+                              <span style={{ color: '#38bdf8', fontFamily: 'monospace' }}>
+                                t={evt.timeMinutes.toFixed(1)}m
+                              </span>{' '}
+                              &bull; {evt.message}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
           </aside>
         </div>
       </main>
@@ -852,7 +1100,7 @@ export const App: React.FC = () => {
       {/* Footer */}
       <footer className="app-footer">
         <div>
-          GridRescue &bull; Phase 3 Domain & Scenario Engine &bull; Jaipur Infrastructure Control Room
+          GridRescue &bull; Phase 6 Hill Climbing Optimizer & Worker &bull; Jaipur Infrastructure Control Room
         </div>
         <div style={{ display: 'flex', gap: '1rem', color: 'var(--text-muted)' }}>
           <span>12 Incidents (4 Power, 3 Water, 2 Comms, 3 Road)</span>

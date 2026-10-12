@@ -1,2 +1,2 @@
 export * from './MapRenderer';
-export * from '../App';
+export * from './ComparisonTable';

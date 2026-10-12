@@ -1,2 +1,2 @@
-// Workers placeholder (populated in Phase 6)
-export {};
+export * from './optimizerClient';
+export * from './optimizer.worker';
