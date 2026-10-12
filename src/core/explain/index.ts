@@ -1,2 +1,1 @@
-// Explainability engine placeholder (populated in Phase 7)
-export {};
+export * from './explainer';
