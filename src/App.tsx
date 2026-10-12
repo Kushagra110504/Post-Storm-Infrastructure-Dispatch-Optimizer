@@ -3,6 +3,12 @@ import { getMapData } from './data/loader';
 import { useAppStore } from './state/store';
 import { MapRenderer, INCIDENT_CONFIG } from './ui/MapRenderer';
 import { exportScenario, importScenario } from './core/scenario/io';
+import { nearestFirstBaseline } from './core/baseline/nearestFirst';
+import { simulate } from './core/plan/simulator';
+import { evaluateCost } from './core/cost/costFunction';
+import { computeKPIs, KPIs } from './core/baseline/kpi';
+import { RouteCache } from './core/routing/routeCache';
+import { SimulationResult } from './core/plan/types';
 
 export const App: React.FC = () => {
   const {
@@ -39,6 +45,10 @@ export const App: React.FC = () => {
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [importText, setImportText] = useState('');
   const [importError, setImportError] = useState<string | null>(null);
+  const [baselineResult, setBaselineResult] = useState<SimulationResult | null>(null);
+  const [baselineKPIs, setBaselineKPIs] = useState<KPIs | null>(null);
+  const [showKpiPanel, setShowKpiPanel] = useState(false);
+  const [baselineRunning, setBaselineRunning] = useState(false);
 
   // Initialize map data once on mount
   useEffect(() => {
@@ -146,6 +156,30 @@ export const App: React.FC = () => {
     }
   };
 
+  // Run nearest-first baseline dispatcher
+  const handleRunBaseline = () => {
+    if (!scenario || !graph) return;
+    setBaselineRunning(true);
+    try {
+      const cache = new RouteCache(graph);
+      const plan = nearestFirstBaseline(scenario, graph, cache);
+      const cache2 = new RouteCache(graph);
+      const result = simulate(plan, scenario, graph, cache2);
+      evaluateCost(result, scenario);
+      const kpis = computeKPIs(result, scenario);
+      setBaselineResult(result);
+      setBaselineKPIs(kpis);
+      setShowKpiPanel(true);
+      setStatusMessage(`Baseline: J=${result.costJ.toFixed(1)} | ${kpis.resolvedCount}/${scenario.incidents.length} resolved`);
+      setTimeout(() => setStatusMessage(null), 5000);
+    } catch (err) {
+      console.error('Baseline failed:', err);
+      setStatusMessage('Baseline dispatch failed — see console');
+    } finally {
+      setBaselineRunning(false);
+    }
+  };
+
 
   return (
     <div className="app-container">
@@ -153,7 +187,7 @@ export const App: React.FC = () => {
       <header className="app-header">
         <div className="logo-group">
           <h1>GridRescue</h1>
-          <span className="badge-phase">Phase 3: Domain & Scenario Engine</span>
+          <span className="badge-phase">Phase 5: Baseline Dispatcher</span>
           <span className="badge-sim">Jaipur, RJ &bull; Real OSM Road Network</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -220,6 +254,32 @@ export const App: React.FC = () => {
           >
             Import JSON
           </button>
+          <button
+            onClick={handleRunBaseline}
+            disabled={!scenario || baselineRunning}
+            className="btn-action"
+            style={{
+              padding: '0.25rem 0.7rem',
+              fontSize: '0.75rem',
+              background: baselineRunning ? '#334155' : 'linear-gradient(135deg, #f59e0b, #d97706)',
+              color: '#0f172a',
+              fontWeight: 700,
+              border: 'none',
+              cursor: scenario && !baselineRunning ? 'pointer' : 'not-allowed',
+            }}
+            title="Run nearest-team-first baseline dispatcher"
+          >
+            {baselineRunning ? 'Running…' : '⚡ Run Baseline'}
+          </button>
+          {baselineKPIs && (
+            <button
+              onClick={() => setShowKpiPanel(p => !p)}
+              className="btn-action btn-secondary"
+              style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
+            >
+              {showKpiPanel ? 'Hide KPIs' : 'Show KPIs'}
+            </button>
+          )}
         </div>
       </header>
 
@@ -245,6 +305,46 @@ export const App: React.FC = () => {
       </div>
 
       {/* Main Layout */}
+      {/* KPI Panel — shown after baseline run */}
+      {showKpiPanel && baselineKPIs && baselineResult && (
+        <div style={{
+          background: 'linear-gradient(135deg, rgba(15,23,42,0.97), rgba(30,41,59,0.97))',
+          borderBottom: '1px solid rgba(245,158,11,0.3)',
+          padding: '0.75rem 1.5rem',
+          display: 'flex',
+          gap: '2rem',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          fontSize: '0.8rem',
+        }}>
+          <span style={{ color: '#94a3b8', fontWeight: 600, fontSize: '0.75rem', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+            Baseline KPIs
+          </span>
+          {[
+            { label: 'Makespan', value: `${baselineKPIs.makespanMinutes.toFixed(1)} min`, color: '#60a5fa' },
+            { label: 'Avg Resolution', value: `${baselineKPIs.avgResolutionTimeMinutes.toFixed(1)} min`, color: '#34d399' },
+            { label: 'Resolved', value: `${baselineKPIs.resolvedCount}/${baselineKPIs.resolvedCount + baselineKPIs.unresolvedCount}`, color: '#a78bfa' },
+            { label: 'Facilities', value: `${baselineKPIs.facilitiesRestored}/${baselineKPIs.totalFacilities}`, color: '#f472b6' },
+            { label: 'Wt. Restore', value: baselineKPIs.weightedRestorationDelay.toFixed(1), color: '#fbbf24' },
+            { label: 'Cost J', value: baselineKPIs.costJ.toFixed(1), color: '#f87171' },
+          ].map(({ label, value, color }) => (
+            <div key={label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.1rem' }}>
+              <span style={{ color, fontWeight: 700, fontSize: '1rem' }}>{value}</span>
+              <span style={{ color: '#64748b', fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</span>
+            </div>
+          ))}
+          <div style={{ marginLeft: 'auto', display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
+            {baselineResult.events.slice(0, 4).map((e, i) => (
+              <span key={i} style={{ color: '#94a3b8', fontSize: '0.7rem' }}>
+                t={e.timeMinutes.toFixed(1)}m — {e.message}
+              </span>
+            ))}
+            {baselineResult.events.length > 4 && (
+              <span style={{ color: '#475569', fontSize: '0.65rem' }}>+{baselineResult.events.length - 4} more events…</span>
+            )}
+          </div>
+        </div>
+      )}
       <main className="app-main">
         <div className="control-room-layout">
           {/* Map Container */}
