@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Nearest-Team-First Baseline Dispatcher.
  *
  * Algorithm:
@@ -73,10 +73,9 @@ export function nearestFirstBaseline(
         const freeAt = teamFreeAt.get(team.id) ?? 0;
         const dispatchTime = Math.max(freeAt, incident.reportedAt);
 
-        const kResult = cache.getKRoutes(graph, team.currentNode, incident.node, 3, blockedEdges);
-        if (kResult.routes.length === 0) continue;
+        const route = cache.getRoute(graph, team.currentNode, incident.node, blockedEdges);
+        if (!route) continue;
 
-        const route = kResult.routes[0]!;
         const travelMin = route.totalTimeSeconds / 60;
         const arrivalTime = dispatchTime + travelMin;
         const skillMatch = team.skills.includes(incident.requiredSkill) ? 1.0 : 1.5;
@@ -101,8 +100,12 @@ export function nearestFirstBaseline(
       const team = scenario.teams.find((t) => t.id === bestTeamId)!;
       const freeAt = teamFreeAt.get(bestTeamId) ?? 0;
       const dispatchTime = Math.max(freeAt, incident.reportedAt);
-      const kResult = cache.getKRoutes(graph, team.currentNode, incident.node, 3, blockedEdges);
-      const route = kResult.routes[bestRouteIndex] ?? kResult.routes[0]!;
+      const route = cache.getRoute(graph, team.currentNode, incident.node, blockedEdges) ?? {
+        path: [team.currentNode],
+        edges: [],
+        totalDistance: 0,
+        totalTimeSeconds: 9999,
+      };
       const travelMin = route.totalTimeSeconds / 60;
       const skillMatch = team.skills.includes(incident.requiredSkill) ? 1.0 : 1.5;
       const repairEnd = dispatchTime + travelMin + incident.baseRepairTime / (team.speedFactor * skillMatch);
@@ -121,7 +124,6 @@ export function nearestFirstBaseline(
       // Unblock road edge if applicable
       if (incident.blockedEdgeId) {
         blockedEdges.delete(incident.blockedEdgeId);
-        cache.invalidate();
       }
 
       remaining.splice(i, 1);

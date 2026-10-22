@@ -2,47 +2,98 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { getMapData } from './data/loader';
 import { useAppStore } from './state/store';
 import { MapRenderer, INCIDENT_CONFIG } from './ui/MapRenderer';
-import { ComparisonTable } from './ui/ComparisonTable';
-import { exportScenario, importScenario } from './core/scenario/io';
 import { nearestFirstBaseline } from './core/baseline/nearestFirst';
 import { simulate } from './core/plan/simulator';
 import { evaluateCost } from './core/cost/costFunction';
 import { computeKPIs, KPIs } from './core/baseline/kpi';
 import { RouteCache } from './core/routing/routeCache';
-import { SimulationResult } from './core/plan/types';
-import { ExplainPanel } from './ui/ExplainPanel';
-import { dynamicReplan } from './core/replan/replanner';
-import { PlanDiffExplanation } from './core/explain/explainer';
-import { Incident, Scenario } from './core/model/schema';
+import { SimulationResult, DispatchPlan } from './core/plan/types';
 import { OptimizerRunner } from './workers/optimizerClient';
 import { HillClimbProgress, HillClimbResult } from './core/hillclimb/hillClimb';
 
+// ─── Strategy definitions ────────────────────────────────────────────────────
+
+type Strategy = 'baseline' | 'hill-climb' | 'random-restart' | 'stochastic';
+
+interface StrategyOption {
+  id: Strategy;
+  label: string;
+  description: string;
+  accentColor: string;          // used only for small indicators, no gradients
+  maxRestarts: number;
+  maxIter: number;
+  neighbors: number;
+}
+
+const STRATEGIES: StrategyOption[] = [
+  {
+    id: 'baseline',
+    label: 'Baseline (Greedy)',
+    description: 'Nearest-first dispatcher. Fast, no optimization.',
+    accentColor: '#d97706',
+    maxRestarts: 0, maxIter: 0, neighbors: 0,
+  },
+  {
+    id: 'hill-climb',
+    label: 'Hill Climbing',
+    description: 'Single-start greedy ascent — accepts only improving moves.',
+    accentColor: '#2563eb',
+    maxRestarts: 1, maxIter: 60, neighbors: 6,
+  },
+  {
+    id: 'random-restart',
+    label: 'Random-Restart HC',
+    description: 'Hill Climbing from 5 random starting points — escapes local optima.',
+    accentColor: '#16a34a',
+    maxRestarts: 5, maxIter: 40, neighbors: 6,
+  },
+  {
+    id: 'stochastic',
+    label: 'Stochastic HC',
+    description: 'Wider neighbour sampling with random restarts.',
+    accentColor: '#7c3aed',
+    maxRestarts: 5, maxIter: 50, neighbors: 12,
+  },
+];
+
+// ─── Shared inline-style constants ──────────────────────────────────────────
+
+const S = {
+  // surfaces
+  surface:  { background: '#ffffff', border: '1px solid #d1d9e0' },
+  raised:   { background: '#f9fafb', border: '1px solid #d1d9e0' },
+  muted:    { background: '#f1f5f9', border: '1px solid #d1d9e0' },
+
+  // text
+  textPrimary:   { color: '#111827' },
+  textSecondary: { color: '#4b5563' },
+  textMuted:     { color: '#9ca3af' },
+
+  // common radius
+  r4: { borderRadius: 4 } as const,
+  r6: { borderRadius: 6 } as const,
+  r8: { borderRadius: 8 } as const,
+
+  mono: { fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace' },
+
+  tagRed:    { background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca', borderRadius: 4, fontSize: '0.68rem', padding: '0.1rem 0.38rem', fontWeight: 600 },
+  tagAmber:  { background: '#fffbeb', color: '#d97706', border: '1px solid #fde68a', borderRadius: 4, fontSize: '0.68rem', padding: '0.1rem 0.38rem', fontWeight: 600 },
+  tagGreen:  { background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0', borderRadius: 4, fontSize: '0.68rem', padding: '0.1rem 0.38rem', fontWeight: 600 },
+  tagBlue:   { background: '#eff6ff', color: '#2563eb', border: '1px solid #bfdbfe', borderRadius: 4, fontSize: '0.68rem', padding: '0.1rem 0.38rem', fontWeight: 600 },
+  tagPurple: { background: '#f5f3ff', color: '#7c3aed', border: '1px solid #ddd6fe', borderRadius: 4, fontSize: '0.68rem', padding: '0.1rem 0.38rem', fontWeight: 600 },
+};
+
+// ─── App ────────────────────────────────────────────────────────────────────
+
 export const App: React.FC = () => {
   const {
-    graph,
-    places,
-    spatialIndex,
-    isMapLoaded,
-    scenario,
-    scenarioSeed,
-    blockedEdgeIds,
-    selectedNodeId,
-    selectedEdgeId,
-    selectedIncidentId,
-    selectedFacilityId,
-    selectedTeamId,
+    graph, places, spatialIndex, isMapLoaded,
+    scenario, scenarioSeed, blockedEdgeIds,
+    selectedNodeId, selectedEdgeId, selectedIncidentId, selectedFacilityId, selectedTeamId,
     filterPlaceType,
-    initMapData,
-    generateAndLoadScenario,
-    loadScenario,
-    toggleEdgeBlock,
-    setEdgeBlocked,
-    clearBlockedEdges,
-    selectNode,
-    selectEdge,
-    selectIncident,
-    selectFacility,
-    selectTeam,
+    initMapData, generateAndLoadScenario,
+    toggleEdgeBlock, clearBlockedEdges,
+    selectNode, selectEdge, selectIncident, selectFacility, selectTeam,
   } = useAppStore();
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -50,28 +101,23 @@ export const App: React.FC = () => {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [inputSeed, setInputSeed] = useState<string>('42');
   const [activeTab, setActiveTab] = useState<'incidents' | 'facilities' | 'teams' | 'roads' | 'dispatch'>('incidents');
-  const [importModalOpen, setImportModalOpen] = useState(false);
-  const [importText, setImportText] = useState('');
-  const [importError, setImportError] = useState<string | null>(null);
+
+  // Dropdown-based demo — no modal needed
+  const [selectedStrategy, setSelectedStrategy] = useState<Strategy>('hill-climb');
+
   const [baselineResult, setBaselineResult] = useState<SimulationResult | null>(null);
   const [baselineKPIs, setBaselineKPIs] = useState<KPIs | null>(null);
-  const [showKpiPanel, setShowKpiPanel] = useState(false);
-  const [baselineRunning, setBaselineRunning] = useState(false);
-
-  // Hill Climbing Optimizer state
+  const [baselinePlan, setBaselinePlan] = useState<DispatchPlan | null>(null);
   const optimizerRunner = useRef<OptimizerRunner>(new OptimizerRunner());
-  const [isOptimizing, setIsOptimizing] = useState(false);
+  const [isRunning, setIsRunning] = useState(false);
   const [optimizerProgress, setOptimizerProgress] = useState<HillClimbProgress | null>(null);
   const [hillClimbResult, setHillClimbResult] = useState<HillClimbResult | null>(null);
   const [hillClimbKPIs, setHillClimbKPIs] = useState<KPIs | null>(null);
   const [activePlanView, setActivePlanView] = useState<'baseline' | 'hillclimb'>('baseline');
+  const [activeStrategyLabel, setActiveStrategyLabel] = useState<string>('');
 
-  // Dynamic replanning and explainability state
-  const [explanation, setExplanation] = useState<PlanDiffExplanation | null>(null);
-  const [showExplainPanel, setShowExplainPanel] = useState(false);
-  const [isReplanRunning, setIsReplanRunning] = useState(false);
+  // ── Init ──────────────────────────────────────────────────────────────────
 
-  // Initialize map data once on mount
   useEffect(() => {
     try {
       const data = getMapData();
@@ -81,16 +127,12 @@ export const App: React.FC = () => {
     }
   }, [initMapData]);
 
-  // Responsive map size measurement
   useEffect(() => {
     if (!containerRef.current) return;
     const updateSize = () => {
       if (containerRef.current) {
         const { clientWidth, clientHeight } = containerRef.current;
-        setMapSize({
-          width: Math.max(clientWidth, 400),
-          height: Math.max(clientHeight, 400),
-        });
+        setMapSize({ width: Math.max(clientWidth, 400), height: Math.max(clientHeight, 400) });
       }
     };
     updateSize();
@@ -99,593 +141,275 @@ export const App: React.FC = () => {
     return () => observer.disconnect();
   }, []);
 
-  // Selected road details
+  // ── Derived selections ────────────────────────────────────────────────────
+
   const selectedEdge = useMemo(() => {
     if (!graph || !selectedEdgeId) return null;
     return graph.edges.find(e => e.id === selectedEdgeId) ?? null;
   }, [graph, selectedEdgeId]);
 
-  // Selected scenario incident
   const currentIncident = useMemo(() => {
     if (!scenario || !selectedIncidentId) return null;
     return scenario.incidents.find(i => i.id === selectedIncidentId) ?? null;
   }, [scenario, selectedIncidentId]);
 
-  // Selected critical facility
   const currentFacility = useMemo(() => {
     if (!scenario || !selectedFacilityId) return null;
     return scenario.facilities.find(f => f.id === selectedFacilityId) ?? null;
   }, [scenario, selectedFacilityId]);
 
-  // Selected team
   const currentTeam = useMemo(() => {
     if (!scenario || !selectedTeamId) return null;
     return scenario.teams.find(t => t.id === selectedTeamId) ?? null;
   }, [scenario, selectedTeamId]);
 
-  // Handle road toggle with user feedback
+  // ── Handlers ─────────────────────────────────────────────────────────────
+
+  const showStatus = (msg: string, ms = 4000) => {
+    setStatusMessage(msg);
+    setTimeout(() => setStatusMessage(null), ms);
+  };
+
   const handleToggleEdge = (edgeId: string) => {
     toggleEdgeBlock(edgeId);
     selectEdge(edgeId);
     const wasBlocked = blockedEdgeIds.has(edgeId);
     const edge = graph?.edges.find(e => e.id === edgeId);
     const name = edge?.name ? `"${edge.name}"` : `ID ${edgeId}`;
-    setStatusMessage(wasBlocked ? `Road ${name} unblocked (reopened)` : `Road ${name} BLOCKED (closed)`);
-    setTimeout(() => setStatusMessage(null), 4000);
+    showStatus(wasBlocked ? `Road ${name} unblocked` : `Road ${name} blocked`);
   };
 
-  // Seed regeneration handler
   const handleRegenerate = (seedValue: number) => {
     setInputSeed(String(seedValue));
     generateAndLoadScenario(seedValue);
-    setStatusMessage(`Generated 12/8/5 Jaipur Scenario with Seed ${seedValue}`);
-    setTimeout(() => setStatusMessage(null), 3000);
+    setBaselineResult(null); setBaselineKPIs(null); setBaselinePlan(null);
+    setHillClimbResult(null); setHillClimbKPIs(null); setOptimizerProgress(null);
+    showStatus(`Scenario #${seedValue} loaded`);
   };
 
-  // Export scenario JSON
-  const handleExportJson = () => {
-    if (!scenario) return;
-    try {
-      const json = exportScenario(scenario);
-      const blob = new Blob([json], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `scenario-jaipur-seed-${scenario.seed}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-      setStatusMessage('Scenario exported to JSON file');
-      setTimeout(() => setStatusMessage(null), 3000);
-    } catch (err) {
-      console.error('Export failed:', err);
-    }
-  };
-
-  // Import scenario JSON
-  const handleImportJson = () => {
-    if (!graph || !importText.trim()) return;
-    try {
-      setImportError(null);
-      const imported = importScenario(importText, graph);
-      loadScenario(imported);
-      setImportModalOpen(false);
-      setImportText('');
-      setStatusMessage(`Imported scenario: "${imported.name}"`);
-      setTimeout(() => setStatusMessage(null), 4000);
-    } catch (err) {
-      setImportError(err instanceof Error ? err.message : String(err));
-    }
-  };
-
-  // Run nearest-first baseline dispatcher
-  const handleRunBaseline = () => {
+  const handleRunDemo = () => {
     if (!scenario || !graph) return;
-    setBaselineRunning(true);
-    try {
-      const cache = new RouteCache(graph);
-      const plan = nearestFirstBaseline(scenario, graph, cache);
-      const cache2 = new RouteCache(graph);
-      const result = simulate(plan, scenario, graph, cache2);
-      evaluateCost(result, scenario);
-      const kpis = computeKPIs(result, scenario);
-      setBaselineResult(result);
-      setBaselineKPIs(kpis);
-      setShowKpiPanel(true);
-      setStatusMessage(`Baseline: J=${result.costJ.toFixed(1)} | ${kpis.resolvedCount}/${scenario.incidents.length} resolved`);
-      setTimeout(() => setStatusMessage(null), 5000);
-    } catch (err) {
-      console.error('Baseline failed:', err);
-      setStatusMessage('Baseline dispatch failed — see console');
-    } finally {
-      setBaselineRunning(false);
-    }
-  };
+    setIsRunning(true);
+    setOptimizerProgress(null);
+    const strat = STRATEGIES.find(s => s.id === selectedStrategy)!;
+    setActiveStrategyLabel(strat.label);
 
-  // Run Hill Climbing optimizer in background Web Worker
-  const handleRunOptimizer = () => {
-    if (!scenario || !graph) return;
-
-    // Run baseline first if not already present, to provide a benchmark
-    if (!baselineResult) {
+    if (selectedStrategy === 'baseline') {
       try {
         const cache = new RouteCache(graph);
         const plan = nearestFirstBaseline(scenario, graph, cache);
-        const sim = simulate(plan, scenario, graph, new RouteCache(graph));
+        const sim = simulate(plan, scenario, graph, cache);
         evaluateCost(sim, scenario);
         const kpis = computeKPIs(sim, scenario);
-        setBaselineResult(sim);
-        setBaselineKPIs(kpis);
-      } catch (e) {
-        console.warn('Auto baseline run error:', e);
-      }
+        setBaselineResult(sim); setBaselineKPIs(kpis); setBaselinePlan(plan);
+        setHillClimbResult(null); setHillClimbKPIs(null);
+        setActivePlanView('baseline');
+        showStatus(`Baseline: J=${sim.costJ.toFixed(1)}, ${kpis.resolvedCount}/${scenario.incidents.length} resolved`, 5000);
+      } catch (e) { console.error(e); showStatus('Baseline failed'); }
+      setIsRunning(false);
+      return;
     }
 
-    setIsOptimizing(true);
-    setOptimizerProgress(null);
-    setShowKpiPanel(true);
-    setStatusMessage('Hill Climbing Optimizer running in background Web Worker...');
+    // Compute baseline first for comparison
+    if (!baselineResult) {
+      try {
+        const cache = new RouteCache(graph);
+        const p = nearestFirstBaseline(scenario, graph, cache);
+        const bsim = simulate(p, scenario, graph, cache);
+        evaluateCost(bsim, scenario);
+        setBaselineResult(bsim); setBaselineKPIs(computeKPIs(bsim, scenario)); setBaselinePlan(p);
+      } catch (e) { console.warn(e); }
+    }
 
+    showStatus(`${strat.label} running…`);
     optimizerRunner.current.start(
-      scenario,
-      graph,
+      scenario, graph,
+      { maxRestarts: strat.maxRestarts, maxIterationsPerRestart: strat.maxIter, neighborsPerStep: strat.neighbors, seed: scenario.seed },
       {
-        maxRestarts: 3,
-        maxIterationsPerRestart: 35,
-        neighborsPerStep: 6,
-        seed: scenario.seed,
-      },
-      {
-        onProgress: (p) => {
-          setOptimizerProgress(p);
-        },
-        onDone: (result) => {
-          setIsOptimizing(false);
+        onProgress: p => setOptimizerProgress(p),
+        onDone: result => {
+          setIsRunning(false);
           setHillClimbResult(result);
           const kpis = computeKPIs(result.bestSimResult, scenario);
           setHillClimbKPIs(kpis);
           setActivePlanView('hillclimb');
-          const imp = result.improvementPct.toFixed(1);
-          setStatusMessage(`Hill Climbing complete! Best J=${result.bestCostJ.toFixed(1)} (${imp}% improvement)`);
-          setTimeout(() => setStatusMessage(null), 5000);
+          setActiveTab('dispatch');
+          showStatus(`${strat.label}: J=${result.bestCostJ.toFixed(1)} (−${result.improvementPct.toFixed(1)}% vs baseline)`, 6000);
         },
-        onError: (err) => {
-          setIsOptimizing(false);
-          setStatusMessage(`Optimizer error: ${err.message}`);
-          setTimeout(() => setStatusMessage(null), 5000);
-        },
+        onError: err => { setIsRunning(false); showStatus(`Error: ${err.message}`); },
       }
     );
   };
 
-  const handleStopOptimizer = () => {
+  const handleStop = () => {
     optimizerRunner.current.stop();
-    setIsOptimizing(false);
-    setStatusMessage('Hill Climbing optimizer paused by operator');
-    setTimeout(() => setStatusMessage(null), 3000);
+    setIsRunning(false);
+    showStatus('Stopped');
   };
 
-  // Dynamic replanning disruption injection handlers
-  const handleInjectHospitalFault = () => {
-    if (!scenario || !graph) return;
-    setIsReplanRunning(true);
-    setStatusMessage('🚨 Emergency Disruption: Hospital Transformer Failure reported! Replanning...');
+  // ── Active plan & sim ─────────────────────────────────────────────────────
 
-    // Locate hospital facility node
-    const hospital = scenario.facilities.find((f) => f.type === 'hospital') ?? scenario.facilities[0];
-    const targetNode = hospital?.node ?? Object.keys(graph.nodes)[0]!;
+  const activePlan = activePlanView === 'hillclimb' ? (hillClimbResult?.bestPlan ?? null) : baselinePlan;
+  const activeSim  = activePlanView === 'hillclimb' ? (hillClimbResult?.bestSimResult ?? null) : baselineResult;
 
-    const newIncident: Incident = {
-      id: `I-EMERGENCY-${Date.now().toString().slice(-4)}`,
-      type: 'power',
-      node: targetNode,
-      placeName: `${hospital?.name ?? 'Hospital'} Emergency Substation Surge`,
-      severity: 5,
-      requiredSkill: 'high-voltage',
-      requiredEquipment: 'generator',
-      baseRepairTime: 25,
-      affectedFacilityIds: hospital ? [hospital.id] : [],
-      reportedAt: 12,
-    };
-
-    const updatedScenario: Scenario = {
-      ...scenario,
-      incidents: [newIncident, ...scenario.incidents],
-    };
-
-    const activePlan =
-      activePlanView === 'hillclimb' && hillClimbResult
-        ? hillClimbResult.bestPlan
-        : baselineResult
-        ? nearestFirstBaseline(scenario, graph, new RouteCache(graph))
-        : nearestFirstBaseline(scenario, graph, new RouteCache(graph));
-
-    const activeSim =
-      activePlanView === 'hillclimb' && hillClimbResult
-        ? hillClimbResult.bestSimResult
-        : baselineResult ?? simulate(activePlan, scenario, graph, new RouteCache(graph));
-
-    setTimeout(() => {
-      try {
-        const replanResult = dynamicReplan(
-          updatedScenario,
-          graph,
-          activePlan,
-          activeSim,
-          12,
-          'Critical hospital transformer explosion reported at t=12m requiring emergency crew redirect'
-        );
-
-        loadScenario(updatedScenario);
-        const kpis = computeKPIs(replanResult.newSimResult, updatedScenario);
-        setHillClimbResult({
-          bestPlan: replanResult.newPlan,
-          bestSimResult: replanResult.newSimResult,
-          baselineCostJ: activeSim.costJ,
-          bestCostJ: replanResult.newCostJ,
-          convergence: [{ iteration: 0, restart: 0, costJ: replanResult.newCostJ }],
-          totalIterations: 1,
-          improvementPct: 0,
-        });
-        setHillClimbKPIs(kpis);
-        setActivePlanView('hillclimb');
-        setExplanation(replanResult.explanation);
-        setShowExplainPanel(true);
-        setStatusMessage(`Replanned successfully: J=${replanResult.newCostJ.toFixed(1)}`);
-      } catch (e) {
-        console.error('Replanning error:', e);
-        setStatusMessage('Dynamic replanning failed');
-      } finally {
-        setIsReplanRunning(false);
-        setTimeout(() => setStatusMessage(null), 5000);
-      }
-    }, 50);
-  };
-
-  const handleInjectRoadBlockage = () => {
-    if (!scenario || !graph) return;
-    setIsReplanRunning(true);
-    setStatusMessage('🚧 Disruption: Major arterial road blocked by debris! Calculating detours...');
-
-    const candidateEdge =
-      graph.edges.find(
-        (e) => !blockedEdgeIds.has(e.id) && (e.highwayType === 'primary' || e.highwayType === 'secondary')
-      ) ?? graph.edges[0];
-
-    if (!candidateEdge) {
-      setIsReplanRunning(false);
-      return;
-    }
-
-    setEdgeBlocked(candidateEdge.id, true);
-
-    const activePlan =
-      activePlanView === 'hillclimb' && hillClimbResult
-        ? hillClimbResult.bestPlan
-        : baselineResult
-        ? nearestFirstBaseline(scenario, graph, new RouteCache(graph))
-        : nearestFirstBaseline(scenario, graph, new RouteCache(graph));
-
-    const activeSim =
-      activePlanView === 'hillclimb' && hillClimbResult
-        ? hillClimbResult.bestSimResult
-        : baselineResult ?? simulate(activePlan, scenario, graph, new RouteCache(graph));
-
-    setTimeout(() => {
-      try {
-        const replanResult = dynamicReplan(
-          scenario,
-          graph,
-          activePlan,
-          activeSim,
-          10,
-          `Arterial route segment "${candidateEdge.name || candidateEdge.id}" blocked by fallen tree`
-        );
-
-        const kpis = computeKPIs(replanResult.newSimResult, scenario);
-        setHillClimbResult({
-          bestPlan: replanResult.newPlan,
-          bestSimResult: replanResult.newSimResult,
-          baselineCostJ: activeSim.costJ,
-          bestCostJ: replanResult.newCostJ,
-          convergence: [{ iteration: 0, restart: 0, costJ: replanResult.newCostJ }],
-          totalIterations: 1,
-          improvementPct: 0,
-        });
-        setHillClimbKPIs(kpis);
-        setActivePlanView('hillclimb');
-        setExplanation(replanResult.explanation);
-        setShowExplainPanel(true);
-        setStatusMessage(`Rerouted around blockage: J=${replanResult.newCostJ.toFixed(1)}`);
-      } catch (e) {
-        console.error('Replanning error:', e);
-        setStatusMessage('Dynamic rerouting failed');
-      } finally {
-        setIsReplanRunning(false);
-        setTimeout(() => setStatusMessage(null), 5000);
-      }
-    }, 50);
-  };
-
-  const handleInjectWaterFailure = () => {
-    if (!scenario || !graph) return;
-    setIsReplanRunning(true);
-    setStatusMessage('💧 Disruption: Water Pumping Station main break! Replanning...');
-
-    const waterFac =
-      scenario.facilities.find((f) => f.type === 'water_facility') ??
-      scenario.facilities[1] ??
-      scenario.facilities[0];
-    const targetNode = waterFac?.node ?? Object.keys(graph.nodes)[1]!;
-
-    const newIncident: Incident = {
-      id: `I-WATER-BURST-${Date.now().toString().slice(-4)}`,
-      type: 'water',
-      node: targetNode,
-      placeName: `${waterFac?.name ?? 'Civic'} Water Main Rupture`,
-      severity: 4,
-      requiredSkill: 'pipe-repair',
-      requiredEquipment: 'excavator',
-      baseRepairTime: 35,
-      affectedFacilityIds: waterFac ? [waterFac.id] : [],
-      reportedAt: 15,
-    };
-
-    const updatedScenario: Scenario = {
-      ...scenario,
-      incidents: [newIncident, ...scenario.incidents],
-    };
-
-    const activePlan =
-      activePlanView === 'hillclimb' && hillClimbResult
-        ? hillClimbResult.bestPlan
-        : baselineResult
-        ? nearestFirstBaseline(scenario, graph, new RouteCache(graph))
-        : nearestFirstBaseline(scenario, graph, new RouteCache(graph));
-
-    const activeSim =
-      activePlanView === 'hillclimb' && hillClimbResult
-        ? hillClimbResult.bestSimResult
-        : baselineResult ?? simulate(activePlan, scenario, graph, new RouteCache(graph));
-
-    setTimeout(() => {
-      try {
-        const replanResult = dynamicReplan(
-          updatedScenario,
-          graph,
-          activePlan,
-          activeSim,
-          15,
-          'Major water distribution main burst requiring excavation equipment'
-        );
-
-        loadScenario(updatedScenario);
-        const kpis = computeKPIs(replanResult.newSimResult, updatedScenario);
-        setHillClimbResult({
-          bestPlan: replanResult.newPlan,
-          bestSimResult: replanResult.newSimResult,
-          baselineCostJ: activeSim.costJ,
-          bestCostJ: replanResult.newCostJ,
-          convergence: [{ iteration: 0, restart: 0, costJ: replanResult.newCostJ }],
-          totalIterations: 1,
-          improvementPct: 0,
-        });
-        setHillClimbKPIs(kpis);
-        setActivePlanView('hillclimb');
-        setExplanation(replanResult.explanation);
-        setShowExplainPanel(true);
-        setStatusMessage(`Replanned successfully for water burst: J=${replanResult.newCostJ.toFixed(1)}`);
-      } catch (e) {
-        console.error('Replanning error:', e);
-        setStatusMessage('Replanning failed');
-      } finally {
-        setIsReplanRunning(false);
-        setTimeout(() => setStatusMessage(null), 5000);
-      }
-    }, 50);
-  };
+  // ── Render ────────────────────────────────────────────────────────────────
 
   return (
     <div className="app-container">
-      {/* Header */}
+
+      {/* ── Header ─────────────────────────────────────────────────────── */}
       <header className="app-header">
         <div className="logo-group">
           <h1>GridRescue</h1>
-          <span className="badge-phase">Phase 7: Dynamic Replanning</span>
-          <span className="badge-sim">Jaipur, RJ &bull; Real OSM Road Network</span>
+          <span className="badge-phase">Hill Climbing Optimizer</span>
+          <span className="badge-sim">Jaipur · OSM Road Network</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+          {/* Status message */}
           {statusMessage && (
-            <span
-              style={{
-                fontSize: '0.8rem',
-                color: '#facc15',
-                background: 'rgba(250, 204, 21, 0.1)',
-                padding: '0.2rem 0.6rem',
-                borderRadius: '4px',
-                border: '1px solid rgba(250, 204, 21, 0.25)',
-              }}
-            >
+            <span style={{
+              fontSize: '0.75rem', color: '#92400e',
+              background: '#fffbeb', border: '1px solid #fde68a',
+              padding: '0.2rem 0.6rem', borderRadius: 4,
+              maxWidth: 340, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+            }}>
               {statusMessage}
             </span>
           )}
 
-          {/* Seed Controls */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: '#1e293b', padding: '0.2rem 0.5rem', borderRadius: '4px', border: '1px solid #334155' }}>
-            <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Seed:</span>
+          {/* Seed control */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', background: '#f9fafb', padding: '0.22rem 0.5rem', borderRadius: 5, border: '1px solid #d1d9e0' }}>
+            <span style={{ fontSize: '0.7rem', color: '#6b7280' }}>Seed</span>
             <input
               type="number"
               value={inputSeed}
-              onChange={(e) => setInputSeed(e.target.value)}
-              style={{ width: '45px', background: '#0f172a', border: '1px solid #475569', color: '#f8fafc', padding: '0.1rem 0.3rem', fontSize: '0.75rem', borderRadius: '2px' }}
+              onChange={e => setInputSeed(e.target.value)}
+              style={{ width: 42, background: '#ffffff', border: '1px solid #d1d9e0', color: '#111827', padding: '0.1rem 0.25rem', fontSize: '0.72rem', borderRadius: 3, outline: 'none' }}
             />
-            <button
-              onClick={() => handleRegenerate(parseInt(inputSeed, 10) || 42)}
-              className="btn-action"
-              style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }}
-            >
+            <button onClick={() => handleRegenerate(parseInt(inputSeed, 10) || 42)} className="btn-action" style={{ padding: '0.15rem 0.5rem', fontSize: '0.7rem' }}>
               Generate
             </button>
           </div>
 
-          {/* Preset Seeds */}
-          <div style={{ display: 'flex', gap: '0.25rem' }}>
-            {[42, 108, 999].map(s => (
-              <button
-                key={s}
-                onClick={() => handleRegenerate(s)}
-                className={`pill-btn ${scenarioSeed === s ? 'active' : ''}`}
-                style={{ padding: '0.2rem 0.45rem', fontSize: '0.7rem' }}
-              >
-                #{s}
-              </button>
-            ))}
-          </div>
-
-          <button
-            onClick={handleExportJson}
-            className="btn-action btn-secondary"
-            style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
-            title="Export scenario as validated JSON"
-          >
-            Export JSON
-          </button>
-          <button
-            onClick={() => { setImportModalOpen(true); setImportError(null); }}
-            className="btn-action btn-secondary"
-            style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
-            title="Import custom scenario JSON"
-          >
-            Import JSON
-          </button>
-          <button
-            onClick={handleRunBaseline}
-            disabled={!scenario || baselineRunning || isOptimizing}
-            className="btn-action"
-            style={{
-              padding: '0.25rem 0.7rem',
-              fontSize: '0.75rem',
-              background: baselineRunning ? '#334155' : 'linear-gradient(135deg, #f59e0b, #d97706)',
-              color: '#0f172a',
-              fontWeight: 700,
-              border: 'none',
-              cursor: scenario && !baselineRunning && !isOptimizing ? 'pointer' : 'not-allowed',
-            }}
-            title="Run nearest-team-first baseline dispatcher"
-          >
-            {baselineRunning ? 'Running…' : '⚡ Run Baseline'}
-          </button>
-
-          {isOptimizing ? (
+          {/* Quick seeds */}
+          {[42, 108, 999].map(s => (
             <button
-              onClick={handleStopOptimizer}
-              className="btn-action btn-danger"
-              style={{
-                padding: '0.25rem 0.7rem',
-                fontSize: '0.75rem',
-                fontWeight: 700,
-                border: 'none',
-              }}
-              title="Stop Hill Climbing optimization"
+              key={s}
+              onClick={() => handleRegenerate(s)}
+              className={`pill-btn ${scenarioSeed === s ? 'active' : ''}`}
+              style={{ padding: '0.2rem 0.45rem', fontSize: '0.68rem' }}
             >
-              ⏹️ Stop Optimizer
+              #{s}
+            </button>
+          ))}
+
+          {/* Strategy dropdown */}
+          <select
+            value={selectedStrategy}
+            onChange={e => setSelectedStrategy(e.target.value as Strategy)}
+            disabled={isRunning}
+            style={{
+              padding: '0.26rem 0.5rem', fontSize: '0.75rem', fontWeight: 500,
+              background: '#ffffff', border: '1px solid #d1d9e0', borderRadius: 5,
+              color: '#111827', cursor: 'pointer', outline: 'none',
+              fontFamily: 'inherit',
+            }}
+          >
+            {STRATEGIES.map(s => (
+              <option key={s.id} value={s.id}>{s.label}</option>
+            ))}
+          </select>
+
+          {/* Run / Stop */}
+          {isRunning ? (
+            <button onClick={handleStop} className="btn-action btn-danger" style={{ padding: '0.3rem 0.9rem' }}>
+              ■ Stop
             </button>
           ) : (
             <button
-              onClick={handleRunOptimizer}
-              disabled={!scenario || isOptimizing || baselineRunning}
+              onClick={handleRunDemo}
+              disabled={!scenario}
               className="btn-action"
-              style={{
-                padding: '0.25rem 0.7rem',
-                fontSize: '0.75rem',
-                background: 'linear-gradient(135deg, #10b981, #059669)',
-                color: '#f8fafc',
-                fontWeight: 700,
-                border: 'none',
-                cursor: scenario && !baselineRunning ? 'pointer' : 'not-allowed',
-              }}
-              title="Run Hill Climbing optimizer with random restarts in background Web Worker"
+              style={{ padding: '0.3rem 1rem', opacity: scenario ? 1 : 0.45 }}
             >
-              ⛰️ Run Optimizer
+              ▶ Run Demo
             </button>
           )}
-
-          {(baselineKPIs || hillClimbKPIs || isOptimizing) && (
-            <button
-              onClick={() => setShowKpiPanel((p) => !p)}
-              className="btn-action btn-secondary"
-              style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
-            >
-              {showKpiPanel ? 'Hide Benchmark' : 'Show Benchmark'}
-            </button>
-          )}
-
-          <button
-            onClick={() => setShowExplainPanel((p) => !p)}
-            className="btn-action btn-secondary"
-            style={{
-              padding: '0.25rem 0.5rem',
-              fontSize: '0.75rem',
-              color: '#f59e0b',
-              border: '1px solid rgba(245, 158, 11, 0.4)',
-            }}
-            title="Toggle dynamic replanning and disruption explainability panel"
-          >
-            {showExplainPanel ? 'Hide Replanner' : '🔄 Replanning & Explain'}
-          </button>
         </div>
       </header>
 
-      {/* Operational Notice Banner */}
-      <div
-        style={{
-          background: 'rgba(245, 158, 11, 0.1)',
-          borderBottom: '1px solid rgba(245, 158, 11, 0.25)',
-          padding: '0.35rem 1.5rem',
-          fontSize: '0.75rem',
-          color: '#fbbf24',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}
-      >
-        <span>
-          <strong>Operational Notice:</strong> Real map (OpenStreetMap), simulated incidents. Not actual infrastructure data.
-        </span>
-        <span>
-          Scenario: <strong>{scenario?.name ?? 'Loading...'}</strong> (12 Incidents &bull; 8 Crews &bull; 5 Critical Facilities)
-        </span>
-      </div>
-
-      {/* Main Layout */}
-      {/* Benchmark & Comparison Panel */}
-      {showKpiPanel && (
-        <ComparisonTable
-          baselineKPIs={baselineKPIs}
-          baselineResult={baselineResult}
-          hillClimbResult={hillClimbResult}
-          hillClimbKPIs={hillClimbKPIs}
-          isOptimizing={isOptimizing}
-          currentProgress={optimizerProgress}
-          activePlanView={activePlanView}
-          onSelectPlanView={(view) => setActivePlanView(view)}
-          onClose={() => setShowKpiPanel(false)}
-        />
+      {/* ── Progress strip ─────────────────────────────────────────────── */}
+      {isRunning && optimizerProgress && (
+        <div style={{ padding: '0.3rem 1.5rem', background: '#f9fafb', borderBottom: '1px solid #d1d9e0', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <span style={{ fontSize: '0.7rem', color: '#6b7280', whiteSpace: 'nowrap' }}>
+            {activeStrategyLabel} · Restart {optimizerProgress.restart + 1} · Iter {optimizerProgress.iteration}
+          </span>
+          <div style={{ flex: 1, height: 3, background: '#e5e7eb', borderRadius: 2, overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: `${Math.min(100, (optimizerProgress.totalIterations / 300) * 100)}%`, background: '#2563eb', borderRadius: 2, transition: 'width 0.3s' }} />
+          </div>
+          <span style={{ fontSize: '0.7rem', color: '#2563eb', ...S.mono, whiteSpace: 'nowrap' }}>
+            J={optimizerProgress.bestJ.toFixed(1)}
+          </span>
+        </div>
       )}
 
-      {/* Dynamic Replanning & Explainability Panel */}
-      {showExplainPanel && (
-        <ExplainPanel
-          explanation={explanation}
-          onInjectHospitalFault={handleInjectHospitalFault}
-          onInjectRoadBlockage={handleInjectRoadBlockage}
-          onInjectWaterFailure={handleInjectWaterFailure}
-          onClose={() => setShowExplainPanel(false)}
-          isReplanRunning={isReplanRunning}
-        />
+      {/* ── KPI comparison bar ─────────────────────────────────────────── */}
+      {(baselineKPIs || hillClimbKPIs) && scenario && (
+        <div style={{ padding: '0.45rem 1.5rem', background: '#ffffff', borderBottom: '1px solid #d1d9e0', display: 'flex', gap: '0.6rem' }}>
+          {baselineKPIs && baselineResult && (
+            <button
+              onClick={() => { setActivePlanView('baseline'); setActiveTab('dispatch'); }}
+              style={{
+                flex: 1, background: activePlanView === 'baseline' ? '#eff6ff' : '#f9fafb',
+                border: `1px solid ${activePlanView === 'baseline' ? '#bfdbfe' : '#d1d9e0'}`,
+                borderRadius: 6, padding: '0.5rem 0.85rem', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', gap: '0.65rem', textAlign: 'left', transition: 'all 0.15s',
+              }}
+            >
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: '0.65rem', color: '#6b7280', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Baseline (Greedy)</div>
+                <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#d97706', ...S.mono }}>J={baselineResult.costJ.toFixed(1)}</div>
+                <div style={{ fontSize: '0.68rem', color: '#6b7280' }}>
+                  {baselineKPIs.resolvedCount}/{scenario.incidents.length} resolved · {baselineKPIs.avgResolutionTimeMinutes.toFixed(1)} min avg
+                </div>
+              </div>
+              {activePlanView === 'baseline' && <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#d97706', flexShrink: 0 }} />}
+            </button>
+          )}
+          {hillClimbKPIs && hillClimbResult && (
+            <button
+              onClick={() => { setActivePlanView('hillclimb'); setActiveTab('dispatch'); }}
+              style={{
+                flex: 1, background: activePlanView === 'hillclimb' ? '#f0fdf4' : '#f9fafb',
+                border: `1px solid ${activePlanView === 'hillclimb' ? '#bbf7d0' : '#d1d9e0'}`,
+                borderRadius: 6, padding: '0.5rem 0.85rem', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', gap: '0.65rem', textAlign: 'left', transition: 'all 0.15s',
+              }}
+            >
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: '0.65rem', color: '#6b7280', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  {activeStrategyLabel || 'Optimized'}
+                </div>
+                <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#16a34a', ...S.mono }}>
+                  J={hillClimbResult.bestCostJ.toFixed(1)}{' '}
+                  <span style={{ fontSize: '0.7rem', color: '#16a34a' }}>−{hillClimbResult.improvementPct.toFixed(1)}%</span>
+                </div>
+                <div style={{ fontSize: '0.68rem', color: '#6b7280' }}>
+                  {hillClimbKPIs.resolvedCount}/{scenario.incidents.length} resolved · {hillClimbKPIs.avgResolutionTimeMinutes.toFixed(1)} min avg
+                </div>
+              </div>
+              {activePlanView === 'hillclimb' && <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#16a34a', flexShrink: 0 }} />}
+            </button>
+          )}
+        </div>
       )}
+
+      {/* ── Main content ───────────────────────────────────────────────── */}
       <main className="app-main">
         <div className="control-room-layout">
-          {/* Map Container */}
+
+          {/* Map */}
           <div className="map-wrapper" ref={containerRef}>
             {isMapLoaded && graph && spatialIndex ? (
               <MapRenderer
@@ -700,264 +424,157 @@ export const App: React.FC = () => {
                 selectedIncidentId={selectedIncidentId}
                 selectedTeamId={selectedTeamId}
                 filterPlaceType={filterPlaceType}
-                onNodeClick={(id) => selectNode(id)}
-                onEdgeClick={(edge) => selectEdge(edge.id)}
+                onNodeClick={id => selectNode(id)}
+                onEdgeClick={edge => selectEdge(edge.id)}
                 onEdgeToggle={handleToggleEdge}
-                onPlaceClick={(place) => selectNode(place.nearestNodeId)}
-                onIncidentClick={(inc) => {
-                  selectIncident(inc.id);
-                  selectNode(inc.node);
-                  setActiveTab('incidents');
-                }}
-                onTeamClick={(team) => {
-                  selectTeam(team.id);
-                  selectNode(team.depotNode);
-                  setActiveTab('teams');
-                }}
+                onPlaceClick={place => selectNode(place.nearestNodeId)}
+                onIncidentClick={inc => { selectIncident(inc.id); selectNode(inc.node); setActiveTab('incidents'); }}
+                onTeamClick={team => { selectTeam(team.id); selectNode(team.depotNode); setActiveTab('teams'); }}
                 width={mapSize.width}
                 height={mapSize.height}
               />
             ) : (
-              <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                Loading offline city graph...
-              </div>
+              <div style={{ color: '#6b7280', fontSize: '0.875rem' }}>Loading city graph…</div>
             )}
           </div>
 
-          {/* Right Sidebar: Control-Room Inspector */}
+          {/* ── Sidebar ──────────────────────────────────────────────── */}
           <aside className="sidebar-panel">
-            {/* Inspector Navigation Tabs */}
-            <div style={{ display: 'flex', gap: '0.3rem', background: '#0f172a', padding: '0.3rem', borderRadius: '6px', border: '1px solid #1e293b' }}>
-              <button
-                onClick={() => setActiveTab('incidents')}
-                className={`pill-btn ${activeTab === 'incidents' ? 'active' : ''}`}
-                style={{ flex: 1, justifyContent: 'center' }}
-              >
-                Incidents ({scenario?.incidents.length ?? 0})
-              </button>
-              <button
-                onClick={() => setActiveTab('facilities')}
-                className={`pill-btn ${activeTab === 'facilities' ? 'active' : ''}`}
-                style={{ flex: 1, justifyContent: 'center' }}
-              >
-                Facilities ({scenario?.facilities.length ?? 0})
-              </button>
-              <button
-                onClick={() => setActiveTab('teams')}
-                className={`pill-btn ${activeTab === 'teams' ? 'active' : ''}`}
-                style={{ flex: 1, justifyContent: 'center' }}
-              >
-                Crews ({scenario?.teams.length ?? 0})
-              </button>
-              <button
-                onClick={() => setActiveTab('roads')}
-                className={`pill-btn ${activeTab === 'roads' ? 'active' : ''}`}
-                style={{ flex: 1, justifyContent: 'center' }}
-              >
-                Roads ({blockedEdgeIds.size})
-              </button>
-              <button
-                onClick={() => setActiveTab('dispatch')}
-                className={`pill-btn ${activeTab === 'dispatch' ? 'active' : ''}`}
-                style={{ flex: 1, justifyContent: 'center' }}
-              >
-                Dispatch {activePlanView === 'hillclimb' ? '⛰️' : '⚡'}
-              </button>
+
+            {/* Tab bar */}
+            <div style={{ display: 'flex', gap: '0.2rem', background: '#f1f5f9', padding: '0.25rem', borderRadius: 6, border: '1px solid #d1d9e0' }}>
+              {(['incidents', 'facilities', 'teams', 'roads', 'dispatch'] as const).map(tab => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`pill-btn ${activeTab === tab ? 'active' : ''}`}
+                  style={{ flex: 1, justifyContent: 'center', fontSize: '0.67rem' }}
+                >
+                  {tab === 'incidents'   && `Incidents (${scenario?.incidents.length ?? 0})`}
+                  {tab === 'facilities'  && `Facilities (${scenario?.facilities.length ?? 0})`}
+                  {tab === 'teams'       && `Crews (${scenario?.teams.length ?? 0})`}
+                  {tab === 'roads'       && `Roads (${blockedEdgeIds.size})`}
+                  {tab === 'dispatch'    && `Dispatch ${activePlanView === 'hillclimb' ? '⛰' : '⚡'}`}
+                </button>
+              ))}
             </div>
 
-            {/* TAB: Incidents */}
+            {/* ── TAB: Incidents ───────────────────────────────────── */}
             {activeTab === 'incidents' && (
-              <div className="card" style={{ flex: 1, overflowY: 'auto', maxHeight: '560px' }}>
+              <div className="card" style={{ flex: 1, overflowY: 'auto', maxHeight: '580px' }}>
                 <div className="card-title">
-                  <span>Simulated Incidents (12)</span>
-                  <span style={{ fontSize: '0.7rem', color: '#ef4444' }}>PRIORITY QUEUE</span>
+                  <span>Incidents</span>
+                  <span style={S.tagRed}>PRIORITY QUEUE</span>
                 </div>
 
                 {currentIncident && (
-                  <div style={{ background: '#1e293b', padding: '0.75rem', borderRadius: '6px', marginBottom: '0.75rem', border: '1px solid #334155' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
-                      <span style={{ fontWeight: 700, color: '#f8fafc', fontSize: '0.85rem' }}>
-                        {currentIncident.placeName}
-                      </span>
-                      <span style={{ background: '#ef4444', color: '#fff', padding: '0.1rem 0.4rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 800 }}>
-                        SEVERITY {currentIncident.severity}
-                      </span>
+                  <div style={{ background: '#f9fafb', padding: '0.65rem', borderRadius: 6, marginBottom: '0.65rem', border: '1px solid #e5e7eb' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                      <span style={{ fontWeight: 700, color: '#111827', fontSize: '0.83rem' }}>{currentIncident.placeName}</span>
+                      <span style={S.tagRed}>SEV {currentIncident.severity}</span>
                     </div>
-                    <div className="data-row">
-                      <span className="data-label">Incident Type</span>
-                      <span className="data-value">{INCIDENT_CONFIG[currentIncident.type]?.label}</span>
-                    </div>
-                    <div className="data-row">
-                      <span className="data-label">Required Skill</span>
-                      <span className="data-value">{currentIncident.requiredSkill}</span>
-                    </div>
-                    <div className="data-row">
-                      <span className="data-label">Required Equipment</span>
-                      <span className="data-value">{currentIncident.requiredEquipment}</span>
-                    </div>
-                    <div className="data-row">
-                      <span className="data-label">Repair Duration</span>
-                      <span className="data-value">{currentIncident.baseRepairTime} min</span>
-                    </div>
+                    <div className="data-row"><span className="data-label">Type</span><span className="data-value">{INCIDENT_CONFIG[currentIncident.type]?.label}</span></div>
+                    <div className="data-row"><span className="data-label">Required Skill</span><span className="data-value">{currentIncident.requiredSkill}</span></div>
+                    <div className="data-row"><span className="data-label">Repair Time</span><span className="data-value">{currentIncident.baseRepairTime} min</span></div>
                     {currentIncident.dependsOn && (
                       <div className="data-row">
                         <span className="data-label">Depends On</span>
-                        <span className="data-value" style={{ color: '#f59e0b' }}>{currentIncident.dependsOn} (MUST FIX FIRST)</span>
+                        <span className="data-value" style={{ color: '#d97706' }}>{currentIncident.dependsOn}</span>
                       </div>
                     )}
                     {currentIncident.blockedEdgeId && (
                       <div className="data-row">
-                        <span className="data-label">Blocks Road Edge</span>
-                        <span className="data-value" style={{ color: '#ef4444' }}>{currentIncident.blockedEdgeId}</span>
+                        <span className="data-label">Blocks Road</span>
+                        <span className="data-value" style={{ color: '#dc2626' }}>{currentIncident.blockedEdgeId}</span>
                       </div>
                     )}
-                    {currentIncident.affectedFacilityIds.length > 0 && (
-                      <div className="data-row">
-                        <span className="data-label">Degrades Facility</span>
-                        <span className="data-value" style={{ color: '#f43f5e' }}>{currentIncident.affectedFacilityIds.join(', ')}</span>
+                    <button onClick={() => selectIncident(null)} className="btn-action btn-secondary" style={{ width: '100%', marginTop: '0.45rem', fontSize: '0.72rem' }}>
+                      Deselect
+                    </button>
+                  </div>
+                )}
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                  {scenario?.incidents.map(inc => {
+                    const conf = INCIDENT_CONFIG[inc.type] ?? { icon: '⚠️', color: '#dc2626', label: inc.type };
+                    const isSel = selectedIncidentId === inc.id;
+                    return (
+                      <div
+                        key={inc.id}
+                        onClick={() => { selectIncident(inc.id); selectNode(inc.node); }}
+                        style={{
+                          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                          padding: '0.4rem 0.55rem',
+                          background: isSel ? '#eff6ff' : '#ffffff',
+                          border: `1px solid ${isSel ? '#bfdbfe' : '#e5e7eb'}`,
+                          borderRadius: 6, cursor: 'pointer', transition: 'background 0.1s',
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                          <span style={{ fontSize: '0.88rem' }}>{conf.icon}</span>
+                          <div>
+                            <div style={{ fontSize: '0.77rem', fontWeight: 600, color: '#111827' }}>{inc.placeName}</div>
+                            <div style={{ fontSize: '0.67rem', color: '#9ca3af' }}>
+                              {conf.label} · {inc.baseRepairTime}m · {inc.requiredSkill}
+                              {inc.dependsOn ? ' · ⚠ DEP' : ''}
+                              {inc.blockedEdgeId ? ' · ⛔ ROAD' : ''}
+                            </div>
+                          </div>
+                        </div>
+                        <span style={inc.severity >= 4 ? S.tagRed : S.tagAmber}>S{inc.severity}</span>
                       </div>
-                    )}
-                    <button
-                      onClick={() => selectIncident(null)}
-                      className="btn-action btn-secondary"
-                      style={{ width: '100%', marginTop: '0.5rem', fontSize: '0.75rem' }}
-                    >
-                      Deselect Incident
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* ── TAB: Facilities ─────────────────────────────────── */}
+            {activeTab === 'facilities' && (
+              <div className="card" style={{ flex: 1, overflowY: 'auto' }}>
+                <div className="card-title">
+                  <span>Critical Facilities</span>
+                  <span style={S.tagGreen}>PROTECTION TARGETS</span>
+                </div>
+
+                {currentFacility && (
+                  <div style={{ background: '#f9fafb', padding: '0.65rem', borderRadius: 6, marginBottom: '0.65rem', border: '1px solid #e5e7eb' }}>
+                    <div style={{ fontWeight: 700, color: '#111827', fontSize: '0.83rem', marginBottom: '0.3rem' }}>{currentFacility.name}</div>
+                    <div className="data-row"><span className="data-label">Criticality Weight</span><span className="data-value">{currentFacility.criticalityWeight}×</span></div>
+                    <div className="data-row">
+                      <span className="data-label">Status</span>
+                      <span className="data-value" style={{ color: currentFacility.incidentIds.length > 0 ? '#dc2626' : '#16a34a' }}>
+                        {currentFacility.incidentIds.length > 0 ? `DEGRADED (${currentFacility.incidentIds.length})` : 'OPERATIONAL'}
+                      </span>
+                    </div>
+                    <button onClick={() => selectFacility(null)} className="btn-action btn-secondary" style={{ width: '100%', marginTop: '0.45rem', fontSize: '0.72rem' }}>
+                      Deselect
                     </button>
                   </div>
                 )}
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                  {scenario?.incidents.map((inc) => {
-                    const conf = INCIDENT_CONFIG[inc.type] ?? { icon: '⚠️', color: '#ef4444', label: inc.type };
-                    const isSelected = selectedIncidentId === inc.id;
-                    return (
-                      <div
-                        key={inc.id}
-                        onClick={() => {
-                          selectIncident(inc.id);
-                          selectNode(inc.node);
-                        }}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          padding: '0.45rem 0.6rem',
-                          background: isSelected ? 'rgba(56, 189, 248, 0.15)' : '#0f172a',
-                          border: isSelected ? '1px solid #38bdf8' : '1px solid #1e293b',
-                          borderRadius: '6px',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          <span style={{ fontSize: '0.9rem' }}>{conf.icon}</span>
-                          <div>
-                            <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#f8fafc' }}>
-                              {inc.placeName}
-                            </div>
-                            <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>
-                              {conf.label} &bull; {inc.baseRepairTime}m &bull; {inc.requiredSkill}
-                              {inc.dependsOn ? ' &bull; ⚠️ DEPENDENCY' : ''}
-                              {inc.blockedEdgeId ? ' &bull; ⛔ BLOCKS ROAD' : ''}
-                            </div>
-                          </div>
-                        </div>
-                        <span
-                          style={{
-                            fontSize: '0.7rem',
-                            fontWeight: 700,
-                            padding: '0.1rem 0.35rem',
-                            borderRadius: '3px',
-                            background: inc.severity >= 4 ? 'rgba(239,68,68,0.2)' : 'rgba(245,158,11,0.2)',
-                            color: inc.severity >= 4 ? '#ef4444' : '#f59e0b',
-                          }}
-                        >
-                          S{inc.severity}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* TAB: Critical Facilities */}
-            {activeTab === 'facilities' && (
-              <div className="card" style={{ flex: 1, overflowY: 'auto' }}>
-                <div className="card-title">
-                  <span>Critical Facilities (5)</span>
-                  <span style={{ fontSize: '0.7rem', color: '#10b981' }}>PROTECTION TARGETS</span>
-                </div>
-
-                {currentFacility && (
-                  <div style={{ background: '#1e293b', padding: '0.75rem', borderRadius: '6px', marginBottom: '0.75rem', border: '1px solid #334155' }}>
-                    <div style={{ fontWeight: 700, color: '#f8fafc', fontSize: '0.85rem', marginBottom: '0.3rem' }}>
-                      {currentFacility.name}
-                    </div>
-                    <div className="data-row">
-                      <span className="data-label">Criticality Weight</span>
-                      <span className="data-value">{currentFacility.criticalityWeight}x</span>
-                    </div>
-                    <div className="data-row">
-                      <span className="data-label">Associated Incidents</span>
-                      <span className="data-value" style={{ color: currentFacility.incidentIds.length > 0 ? '#ef4444' : '#10b981' }}>
-                        {currentFacility.incidentIds.length > 0 ? currentFacility.incidentIds.join(', ') : 'None (Fully Powered)'}
-                      </span>
-                    </div>
-                    <button
-                      onClick={() => selectFacility(null)}
-                      className="btn-action btn-secondary"
-                      style={{ width: '100%', marginTop: '0.5rem', fontSize: '0.75rem' }}
-                    >
-                      Deselect Facility
-                    </button>
-                  </div>
-                )}
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   {scenario?.facilities.map(fac => {
-                    const isSelected = selectedFacilityId === fac.id;
-                    const isDegraded = fac.incidentIds.length > 0;
+                    const isSel = selectedFacilityId === fac.id;
+                    const isDeg = fac.incidentIds.length > 0;
                     return (
                       <div
                         key={fac.id}
-                        onClick={() => {
-                          selectFacility(fac.id);
-                          selectNode(fac.node);
-                        }}
+                        onClick={() => { selectFacility(fac.id); selectNode(fac.node); }}
                         style={{
-                          padding: '0.6rem',
-                          background: isSelected ? 'rgba(56, 189, 248, 0.15)' : '#0f172a',
-                          border: isSelected ? '1px solid #38bdf8' : '1px solid #1e293b',
-                          borderRadius: '6px',
-                          cursor: 'pointer',
+                          padding: '0.45rem 0.55rem',
+                          background: isSel ? '#eff6ff' : '#ffffff',
+                          border: `1px solid ${isSel ? '#bfdbfe' : '#e5e7eb'}`,
+                          borderRadius: 6, cursor: 'pointer',
                         }}
                       >
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <span style={{ fontWeight: 600, fontSize: '0.825rem', color: '#f8fafc' }}>
-                            {fac.name}
-                          </span>
-                          <span
-                            style={{
-                              fontSize: '0.7rem',
-                              padding: '0.1rem 0.4rem',
-                              borderRadius: '4px',
-                              background: isDegraded ? 'rgba(239,68,68,0.2)' : 'rgba(16,185,129,0.2)',
-                              color: isDegraded ? '#ef4444' : '#10b981',
-                              fontWeight: 600,
-                            }}
-                          >
-                            {isDegraded ? `DEGRADED (${fac.incidentIds.length})` : 'OPERATIONAL'}
-                          </span>
+                          <span style={{ fontWeight: 600, fontSize: '0.78rem', color: '#111827' }}>{fac.name}</span>
+                          <span style={isDeg ? S.tagRed : S.tagGreen}>{isDeg ? 'DEGRADED' : 'OK'}</span>
                         </div>
-                        <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: '0.2rem' }}>
-                          Type: {fac.type} &bull; Criticality Weight: {fac.criticalityWeight}x
+                        <div style={{ fontSize: '0.67rem', color: '#9ca3af', marginTop: '0.15rem' }}>
+                          {fac.type} · Crit {fac.criticalityWeight}×
                         </div>
-                        {isDegraded && (
-                          <div style={{ fontSize: '0.7rem', color: '#fb7185', marginTop: '0.25rem' }}>
-                            Impacted by incidents: {fac.incidentIds.join(', ')}
-                          </div>
-                        )}
                       </div>
                     );
                   })}
@@ -965,76 +582,46 @@ export const App: React.FC = () => {
               </div>
             )}
 
-            {/* TAB: Teams */}
+            {/* ── TAB: Crews ───────────────────────────────────────── */}
             {activeTab === 'teams' && (
               <div className="card" style={{ flex: 1, overflowY: 'auto' }}>
                 <div className="card-title">
-                  <span>Dispatch Crews (8)</span>
-                  <span style={{ fontSize: '0.7rem', color: '#0284c7' }}>SPECIALIZED UNITS</span>
+                  <span>Dispatch Crews</span>
+                  <span style={S.tagBlue}>SPECIALIZED</span>
                 </div>
 
                 {currentTeam && (
-                  <div style={{ background: '#1e293b', padding: '0.75rem', borderRadius: '6px', marginBottom: '0.75rem', border: '1px solid #334155' }}>
-                    <div style={{ fontWeight: 700, color: '#f8fafc', fontSize: '0.85rem', marginBottom: '0.3rem' }}>
-                      {currentTeam.name}
-                    </div>
-                    <div className="data-row">
-                      <span className="data-label">Vehicle Type</span>
-                      <span className="data-value">{currentTeam.vehicleType}</span>
-                    </div>
-                    <div className="data-row">
-                      <span className="data-label">Skills</span>
-                      <span className="data-value">{currentTeam.skills.join(', ')}</span>
-                    </div>
-                    <div className="data-row">
-                      <span className="data-label">Equipment</span>
-                      <span className="data-value">{currentTeam.equipment.join(', ')}</span>
-                    </div>
-                    <div className="data-row">
-                      <span className="data-label">Status</span>
-                      <span className="data-value" style={{ color: '#38bdf8' }}>{currentTeam.status}</span>
-                    </div>
-                    <button
-                      onClick={() => selectTeam(null)}
-                      className="btn-action btn-secondary"
-                      style={{ width: '100%', marginTop: '0.5rem', fontSize: '0.75rem' }}
-                    >
-                      Deselect Crew
+                  <div style={{ background: '#f9fafb', padding: '0.65rem', borderRadius: 6, marginBottom: '0.65rem', border: '1px solid #e5e7eb' }}>
+                    <div style={{ fontWeight: 700, color: '#111827', fontSize: '0.83rem', marginBottom: '0.3rem' }}>{currentTeam.name}</div>
+                    <div className="data-row"><span className="data-label">Vehicle</span><span className="data-value">{currentTeam.vehicleType}</span></div>
+                    <div className="data-row"><span className="data-label">Skills</span><span className="data-value">{currentTeam.skills.join(', ')}</span></div>
+                    <div className="data-row"><span className="data-label">Status</span><span className="data-value" style={{ color: '#2563eb' }}>{currentTeam.status}</span></div>
+                    <button onClick={() => selectTeam(null)} className="btn-action btn-secondary" style={{ width: '100%', marginTop: '0.45rem', fontSize: '0.72rem' }}>
+                      Deselect
                     </button>
                   </div>
                 )}
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                   {scenario?.teams.map(t => {
-                    const isSelected = selectedTeamId === t.id;
+                    const isSel = selectedTeamId === t.id;
                     return (
                       <div
                         key={t.id}
-                        onClick={() => {
-                          selectTeam(t.id);
-                          selectNode(t.depotNode);
-                        }}
+                        onClick={() => { selectTeam(t.id); selectNode(t.depotNode); }}
                         style={{
-                          padding: '0.5rem 0.65rem',
-                          background: isSelected ? 'rgba(56, 189, 248, 0.15)' : '#0f172a',
-                          border: isSelected ? '1px solid #38bdf8' : '1px solid #1e293b',
-                          borderRadius: '6px',
-                          cursor: 'pointer',
+                          padding: '0.4rem 0.55rem',
+                          background: isSel ? '#eff6ff' : '#ffffff',
+                          border: `1px solid ${isSel ? '#bfdbfe' : '#e5e7eb'}`,
+                          borderRadius: 6, cursor: 'pointer',
                         }}
                       >
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <span style={{ fontWeight: 600, fontSize: '0.825rem', color: '#f8fafc' }}>
-                            {t.name}
-                          </span>
-                          <span style={{ fontSize: '0.7rem', color: '#38bdf8', fontFamily: 'var(--font-mono)' }}>
-                            {t.vehicleType}
-                          </span>
+                          <span style={{ fontWeight: 600, fontSize: '0.78rem', color: '#111827' }}>{t.name}</span>
+                          <span style={{ ...S.mono, fontSize: '0.67rem', color: '#6b7280' }}>{t.vehicleType}</span>
                         </div>
-                        <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: '0.2rem' }}>
-                          Skill: {t.skills.join(', ')} &bull; Gear: {t.equipment.join(', ')}
-                        </div>
-                        <div style={{ fontSize: '0.7rem', color: '#64748b' }}>
-                          Depot: {t.depotNode} &bull; Status: {t.status}
+                        <div style={{ fontSize: '0.67rem', color: '#9ca3af', marginTop: '0.12rem' }}>
+                          {t.skills.join(', ')}
                         </div>
                       </div>
                     );
@@ -1043,65 +630,40 @@ export const App: React.FC = () => {
               </div>
             )}
 
-            {/* TAB: Roads & Blocking */}
+            {/* ── TAB: Roads ───────────────────────────────────────── */}
             {activeTab === 'roads' && (
               <div className="card" style={{ flex: 1 }}>
                 <div className="card-title">
-                  <span>Road Blockage Manager</span>
-                  <span style={{ fontSize: '0.7rem', color: blockedEdgeIds.size > 0 ? '#ef4444' : '#10b981' }}>
+                  <span>Road Blockages</span>
+                  <span style={blockedEdgeIds.size > 0 ? S.tagRed : S.tagGreen}>
                     {blockedEdgeIds.size} BLOCKED
                   </span>
                 </div>
 
                 {selectedEdge ? (
                   <div>
-                    <div className="data-row">
-                      <span className="data-label">Road Name</span>
-                      <span className="data-value" style={{ color: '#38bdf8' }}>
-                        {selectedEdge.name || 'Unnamed Segment'}
-                      </span>
-                    </div>
-                    <div className="data-row">
-                      <span className="data-label">Highway Class</span>
-                      <span className="data-value">{selectedEdge.highwayType ?? 'unclassified'}</span>
-                    </div>
-                    <div className="data-row">
-                      <span className="data-label">Length</span>
-                      <span className="data-value">{Math.round(selectedEdge.length)} m</span>
-                    </div>
+                    <div className="data-row"><span className="data-label">Road Name</span><span className="data-value">{selectedEdge.name || 'Unnamed'}</span></div>
+                    <div className="data-row"><span className="data-label">Class</span><span className="data-value">{selectedEdge.highwayType ?? 'unclassified'}</span></div>
+                    <div className="data-row"><span className="data-label">Length</span><span className="data-value">{Math.round(selectedEdge.length)} m</span></div>
                     <div className="data-row">
                       <span className="data-label">Status</span>
-                      <span className="data-value" style={{ color: blockedEdgeIds.has(selectedEdge.id) ? '#ef4444' : '#10b981' }}>
+                      <span className="data-value" style={{ color: blockedEdgeIds.has(selectedEdge.id) ? '#dc2626' : '#16a34a' }}>
                         {blockedEdgeIds.has(selectedEdge.id) ? 'BLOCKED' : 'CLEAR'}
                       </span>
                     </div>
-
-                    <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem' }}>
-                      <button
-                        onClick={() => handleToggleEdge(selectedEdge.id)}
-                        className={`btn-action ${blockedEdgeIds.has(selectedEdge.id) ? 'btn-danger' : ''}`}
-                        style={{ flex: 1 }}
-                      >
-                        {blockedEdgeIds.has(selectedEdge.id) ? '⛔ Unblock Road' : '🚧 Block Road'}
+                    <div style={{ marginTop: '0.6rem', display: 'flex', gap: '0.4rem' }}>
+                      <button onClick={() => handleToggleEdge(selectedEdge.id)} className={`btn-action ${blockedEdgeIds.has(selectedEdge.id) ? 'btn-danger' : ''}`} style={{ flex: 1 }}>
+                        {blockedEdgeIds.has(selectedEdge.id) ? '⛔ Unblock' : '🚧 Block'}
                       </button>
-                      <button
-                        onClick={() => selectEdge(null)}
-                        className="btn-action btn-secondary"
-                      >
-                        Dismiss
-                      </button>
+                      <button onClick={() => selectEdge(null)} className="btn-action btn-secondary">Dismiss</button>
                     </div>
                   </div>
                 ) : (
-                  <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                  <div style={{ fontSize: '0.78rem', color: '#6b7280' }}>
                     <p>Click any road on the map to inspect or toggle blockage.</p>
                     {blockedEdgeIds.size > 0 && (
-                      <div style={{ marginTop: '1rem' }}>
-                        <button
-                          onClick={clearBlockedEdges}
-                          className="btn-action btn-danger"
-                          style={{ width: '100%' }}
-                        >
+                      <div style={{ marginTop: '0.75rem' }}>
+                        <button onClick={clearBlockedEdges} className="btn-action btn-danger" style={{ width: '100%' }}>
                           Clear All ({blockedEdgeIds.size}) Blocked Roads
                         </button>
                       </div>
@@ -1111,258 +673,100 @@ export const App: React.FC = () => {
               </div>
             )}
 
-            {/* TAB: Dispatch Schedule */}
+            {/* ── TAB: Dispatch ────────────────────────────────────── */}
             {activeTab === 'dispatch' && (
-              <div className="card" style={{ flex: 1, overflowY: 'auto', maxHeight: '560px' }}>
+              <div className="card" style={{ flex: 1, overflowY: 'auto', maxHeight: '580px' }}>
                 <div className="card-title">
-                  <span>
-                    {activePlanView === 'hillclimb' ? '⛰️ Hill Climbing Plan' : '⚡ Baseline Plan'}
-                  </span>
-                  <span
-                    style={{
-                      fontSize: '0.7rem',
-                      color: activePlanView === 'hillclimb' ? '#34d399' : '#60a5fa',
-                      fontWeight: 600,
-                    }}
-                  >
+                  <span>{activePlanView === 'hillclimb' ? '⛰ Optimized Plan' : '⚡ Baseline Plan'}</span>
+                  <span style={activePlanView === 'hillclimb' ? S.tagGreen : S.tagBlue}>
                     {activePlanView === 'hillclimb'
                       ? (hillClimbResult ? `J=${hillClimbResult.bestCostJ.toFixed(1)}` : 'IN PROGRESS')
                       : (baselineResult ? `J=${baselineResult.costJ.toFixed(1)}` : 'NOT RUN')}
                   </span>
                 </div>
 
-                {(() => {
-                  const currentPlan =
-                    activePlanView === 'hillclimb'
-                      ? (hillClimbResult?.bestPlan ?? null)
-                      : (baselineResult && scenario && graph ? nearestFirstBaseline(scenario, graph, new RouteCache(graph)) : null);
-                  const currentSim =
-                    activePlanView === 'hillclimb'
-                      ? (hillClimbResult?.bestSimResult ?? null)
-                      : baselineResult;
+                {(!activeSim || !activePlan) ? (
+                  <div style={{ fontSize: '0.78rem', color: '#9ca3af', padding: '0.75rem 0', textAlign: 'center' }}>
+                    No plan yet. Select a strategy above and press{' '}
+                    <strong style={{ color: '#2563eb' }}>▶ Run Demo</strong>.
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                    {/* Summary row */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.4rem 0.55rem', background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 6, fontSize: '0.72rem' }}>
+                      <span style={{ color: '#6b7280' }}>{activePlan.assignments.length} assignments</span>
+                      <span style={{ color: '#2563eb', fontWeight: 600 }}>{activeSim.makespanMinutes.toFixed(1)} min makespan</span>
+                    </div>
 
-                  if (!currentSim || !currentPlan) {
-                    return (
-                      <div style={{ fontSize: '0.8rem', color: '#94a3b8', padding: '1rem', textAlign: 'center' }}>
-                        No dispatch schedule calculated for {activePlanView === 'hillclimb' ? 'Hill Climbing' : 'Baseline'}.
-                        <div style={{ marginTop: '0.75rem' }}>
-                          <button
-                            onClick={activePlanView === 'hillclimb' ? handleRunOptimizer : handleRunBaseline}
-                            className="btn-action"
-                            style={{ fontSize: '0.75rem' }}
+                    {/* Assignment list */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                      <span style={{ fontSize: '0.67rem', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        Crew Dispatches
+                      </span>
+                      {activePlan.assignments.map((asgn, idx) => {
+                        const inc  = scenario?.incidents.find(i => i.id === asgn.incidentId);
+                        const team = scenario?.teams.find(t => t.id === asgn.teamId);
+                        const isSel = selectedIncidentId === inc?.id;
+                        return (
+                          <div
+                            key={idx}
+                            onClick={() => { if (inc) { selectIncident(inc.id); selectNode(inc.node); } }}
+                            style={{
+                              padding: '0.38rem 0.5rem',
+                              background: isSel ? '#eff6ff' : '#ffffff',
+                              border: `1px solid ${isSel ? '#bfdbfe' : '#e5e7eb'}`,
+                              borderRadius: 5, cursor: 'pointer', fontSize: '0.73rem',
+                              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                            }}
                           >
-                            {activePlanView === 'hillclimb' ? '⛰️ Run Optimizer' : '⚡ Run Baseline'}
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  }
-
-                  return (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                      <div
-                        style={{
-                          background: '#0f172a',
-                          padding: '0.5rem 0.75rem',
-                          borderRadius: '6px',
-                          border: '1px solid #1e293b',
-                          fontSize: '0.75rem',
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                        }}
-                      >
-                        <span style={{ color: '#94a3b8' }}>
-                          {currentPlan.assignments.length} Crew Assignments
-                        </span>
-                        <span style={{ color: '#38bdf8', fontWeight: 600 }}>
-                          {currentSim.events.length} Timeline Events
-                        </span>
-                      </div>
-
-                      {/* Crew Assignment List */}
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                        <span style={{ fontSize: '0.7rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>
-                          Crew Dispatches
-                        </span>
-                        {currentPlan.assignments.map((assignment, idx) => {
-                          const incident = scenario?.incidents.find((i) => i.id === assignment.incidentId);
-                          const team = scenario?.teams.find((t) => t.id === assignment.teamId);
-                          const isIncSelected = selectedIncidentId === incident?.id;
-
-                          return (
-                            <div
-                              key={idx}
-                              onClick={() => {
-                                if (incident) {
-                                  selectIncident(incident.id);
-                                  selectNode(incident.node);
-                                }
-                              }}
-                              style={{
-                                padding: '0.45rem 0.6rem',
-                                background: isIncSelected ? 'rgba(56, 189, 248, 0.15)' : '#0f172a',
-                                border: isIncSelected ? '1px solid #38bdf8' : '1px solid #1e293b',
-                                borderRadius: '6px',
-                                cursor: 'pointer',
-                                fontSize: '0.75rem',
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                              }}
-                            >
-                              <div>
-                                <div style={{ fontWeight: 600, color: '#f8fafc' }}>
-                                  {team?.name ?? assignment.teamId} → {incident?.placeName ?? assignment.incidentId}
-                                </div>
-                                <div style={{ fontSize: '0.68rem', color: '#94a3b8' }}>
-                                  Route Alt #{assignment.routeIndex + 1} &bull; {incident?.requiredSkill}
-                                </div>
+                            <div>
+                              <div style={{ fontWeight: 600, color: '#111827' }}>
+                                {team?.name ?? asgn.teamId} → {inc?.placeName ?? asgn.incidentId}
                               </div>
-                              <span
-                                style={{
-                                  fontSize: '0.68rem',
-                                  padding: '0.1rem 0.35rem',
-                                  borderRadius: '3px',
-                                  background: 'rgba(56, 189, 248, 0.1)',
-                                  color: '#38bdf8',
-                                }}
-                              >
-                                #{idx + 1}
-                              </span>
+                              <div style={{ fontSize: '0.66rem', color: '#9ca3af' }}>
+                                Route #{asgn.routeIndex + 1} · {inc?.requiredSkill}
+                              </div>
                             </div>
-                          );
-                        })}
-                      </div>
+                            <span style={S.tagBlue}>#{idx + 1}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
 
-                      {/* Event Log Stream */}
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', marginTop: '0.5rem' }}>
-                        <span style={{ fontSize: '0.7rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>
-                          Timeline Log ({currentSim.events.length} Events)
-                        </span>
-                        <div
-                          style={{
-                            maxHeight: '180px',
-                            overflowY: 'auto',
-                            background: '#020617',
-                            padding: '0.4rem',
-                            borderRadius: '4px',
-                            border: '1px solid #1e293b',
-                            fontSize: '0.7rem',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '0.2rem',
-                          }}
-                        >
-                          {currentSim.events.map((evt, i) => (
-                            <div key={i} style={{ color: '#94a3b8', lineHeight: 1.3 }}>
-                              <span style={{ color: '#38bdf8', fontFamily: 'monospace' }}>
-                                t={evt.timeMinutes.toFixed(1)}m
-                              </span>{' '}
-                              &bull; {evt.message}
-                            </div>
-                          ))}
-                        </div>
+                    {/* Timeline log — concise */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', marginTop: '0.25rem' }}>
+                      <span style={{ fontSize: '0.67rem', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        Timeline ({activeSim.events.length} events)
+                      </span>
+                      <div style={{
+                        maxHeight: '160px', overflowY: 'auto',
+                        background: '#f9fafb', border: '1px solid #e5e7eb',
+                        borderRadius: 5, padding: '0.35rem',
+                        fontSize: '0.68rem', display: 'flex', flexDirection: 'column', gap: '0.15rem',
+                      }}>
+                        {activeSim.events.map((evt, i) => (
+                          <div key={i} style={{ color: '#4b5563', lineHeight: 1.35 }}>
+                            <span style={{ ...S.mono, color: '#2563eb' }}>t={evt.timeMinutes.toFixed(1)}m</span>
+                            {' '}· {evt.message}
+                          </div>
+                        ))}
                       </div>
                     </div>
-                  );
-                })()}
+                  </div>
+                )}
               </div>
             )}
+
           </aside>
         </div>
       </main>
 
-      {/* Import Scenario Modal */}
-      {importModalOpen && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0, 0, 0, 0.75)',
-            backdropFilter: 'blur(4px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 100,
-          }}
-        >
-          <div
-            style={{
-              background: '#0f172a',
-              border: '1px solid #334155',
-              borderRadius: '8px',
-              padding: '1.25rem',
-              width: '90%',
-              maxWidth: '560px',
-            }}
-          >
-            <h3 style={{ fontSize: '1rem', color: '#f8fafc', marginBottom: '0.5rem' }}>
-              Import Scenario JSON
-            </h3>
-            <p style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '0.75rem' }}>
-              Paste validated scenario JSON below (enforces 1MB limit, Zod validation, and map node checks).
-            </p>
-            {importError && (
-              <div
-                style={{
-                  background: 'rgba(239, 68, 68, 0.15)',
-                  border: '1px solid #ef4444',
-                  color: '#f87171',
-                  padding: '0.5rem',
-                  borderRadius: '4px',
-                  fontSize: '0.75rem',
-                  marginBottom: '0.75rem',
-                }}
-              >
-                {importError}
-              </div>
-            )}
-            <textarea
-              value={importText}
-              onChange={(e) => setImportText(e.target.value)}
-              placeholder="Paste Scenario JSON..."
-              rows={8}
-              style={{
-                width: '100%',
-                background: '#020617',
-                border: '1px solid #334155',
-                borderRadius: '4px',
-                color: '#f8fafc',
-                fontFamily: 'var(--font-mono)',
-                fontSize: '0.75rem',
-                padding: '0.5rem',
-                resize: 'vertical',
-              }}
-            />
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', marginTop: '0.75rem' }}>
-              <button
-                onClick={() => setImportModalOpen(false)}
-                className="btn-action btn-secondary"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleImportJson}
-                className="btn-action"
-              >
-                Validate & Import
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Footer */}
+      {/* ── Footer ─────────────────────────────────────────────────────── */}
       <footer className="app-footer">
-        <div>
-          GridRescue &bull; Phase 7 Dynamic Replanning & Explainability &bull; Jaipur Infrastructure Control Room
-        </div>
-        <div style={{ display: 'flex', gap: '1rem', color: 'var(--text-muted)' }}>
-          <span>12 Incidents (4 Power, 3 Water, 2 Comms, 3 Road)</span>
-          <span>8 Specialized Crews</span>
-          <span>5 Critical Facilities</span>
-          <span>&copy; OpenStreetMap contributors (ODbL)</span>
+        <div>GridRescue · Hill Climbing Dispatch Optimizer · Jaipur Infrastructure</div>
+        <div style={{ display: 'flex', gap: '1rem' }}>
+          <span>12 Incidents</span><span>8 Crews</span><span>5 Facilities</span>
+          <span>© OpenStreetMap contributors (ODbL)</span>
         </div>
       </footer>
     </div>

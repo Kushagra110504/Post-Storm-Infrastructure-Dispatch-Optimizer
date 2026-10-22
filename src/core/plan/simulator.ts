@@ -90,9 +90,22 @@ export function simulate(
         incident.dependsOn ? (resolvedAt.get(incident.dependsOn) ?? 0) : 0
       );
 
-      // Route: use cached k-routes if available, else single Dijkstra
-      const kResult = cache.getKRoutes(graph, team.currentNode, incident.node, 3, blockedEdges);
-      const chosenRoute = kResult.routes[pa.routeIndex] ?? kResult.routes[0] ?? null;
+      // Route: single Dijkstra for primary routeIndex 0, k-routes only when an alternative route is requested
+      let chosenRoute: import("../routing/dijkstra").RouteResult | null = null;
+      if (pa.routeIndex === 0) {
+        chosenRoute = cache.getRoute(graph, team.currentNode, incident.node, blockedEdges);
+      } else {
+        const kResult = cache.getKRoutes(graph, team.currentNode, incident.node, 3, blockedEdges);
+        chosenRoute = kResult.routes[pa.routeIndex] ?? kResult.routes[0] ?? null;
+      }
+
+      // Attach resolved route to the plan assignment for visualization
+      const matchingAssignment = plan.assignments.find(
+        (a) => a.incidentId === pa.incidentId && a.teamId === pa.teamId
+      );
+      if (matchingAssignment && chosenRoute) {
+        matchingAssignment.route = chosenRoute;
+      }
 
       const travelMinutes = chosenRoute
         ? chosenRoute.totalTimeSeconds / 60
@@ -140,7 +153,7 @@ export function simulate(
       // Unblock edge if this is a road incident
       if (incident.blockedEdgeId) {
         blockedEdges.delete(incident.blockedEdgeId);
-        cache.invalidate();
+        // Note: cache keys are already partitioned by blocked edges, no need to wipe cache
         emit(events, {
           type: "edge-unblocked",
           timeMinutes: repairEnd,

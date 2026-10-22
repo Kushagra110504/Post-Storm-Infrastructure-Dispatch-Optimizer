@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Yen''s K-Shortest Paths (Yen-lite) using Dijkstra as the sub-solver.
  * Returns up to k loop-free paths from start to target, ordered by totalTimeSeconds.
  */
@@ -24,11 +24,20 @@ export function kShortestPaths(
   const firstRoute = dijkstra(graph, start, target, extraBlockedEdges, "time", adj);
   if (!firstRoute) return { routes: [] };
   A.push(firstRoute);
+  if (k <= 1) return { routes: A };
+
+  // Pre-build edge map for O(1) attribute lookup
+  const edgeMap = new Map<string, { length: number; speed: number }>();
+  for (const e of graph.edges) {
+    edgeMap.set(e.id, { length: e.length, speed: e.speed });
+  }
 
   for (let kIdx = 1; kIdx < k; kIdx++) {
     const prevRoute = A[kIdx - 1]!;
+    // Stride intermediate spur evaluations for efficiency on large graphs
+    const stepSize = Math.max(1, Math.floor(prevRoute.path.length / 10));
 
-    for (let i = 0; i < prevRoute.path.length - 1; i++) {
+    for (let i = 0; i < prevRoute.path.length - 1; i += stepSize) {
       const spurNode = prevRoute.path[i]!;
       const rootPath = prevRoute.path.slice(0, i + 1);
       const rootEdges = prevRoute.edges.slice(0, i);
@@ -40,10 +49,16 @@ export function kShortestPaths(
           if (edgeToBlock) blocked.add(edgeToBlock);
         }
       }
-      const rootNodeSet = new Set(rootPath.slice(0, -1));
-      for (const edge of graph.edges) {
-        if (edge.from !== spurNode && rootNodeSet.has(edge.from)) blocked.add(edge.id);
-        if (edge.to !== spurNode && rootNodeSet.has(edge.to)) blocked.add(edge.id);
+
+      // Block edges connected to root nodes (excluding spurNode) via adjacency list in O(degree)
+      const rootNodes = rootPath.slice(0, -1);
+      for (const rn of rootNodes) {
+        const neighbors = adj.get(rn);
+        if (neighbors) {
+          for (const nb of neighbors) {
+            blocked.add(nb.edgeId);
+          }
+        }
       }
 
       const spurRoute = dijkstra(graph, spurNode, target, blocked, "time", adj);
@@ -55,7 +70,7 @@ export function kShortestPaths(
       let totalTimeSeconds = 0;
       let totalDistance = 0;
       for (const edgeId of totalEdges) {
-        const edge = graph.edges.find((e) => e.id === edgeId);
+        const edge = edgeMap.get(edgeId);
         if (edge) {
           totalTimeSeconds += (edge.length / Math.max(edge.speed, 5)) * 3.6;
           totalDistance += edge.length;

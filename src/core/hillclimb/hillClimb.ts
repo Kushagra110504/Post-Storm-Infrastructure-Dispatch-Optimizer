@@ -95,11 +95,14 @@ export function hillClimb(
   const locked = mergedOpts.lockedIncidentIds;
 
   // --- 1. Evaluate baseline or warm-start plan ---
-  const baseCache = new RouteCache(graph);
+  // Reuse a shared RouteCache across the entire hill climb run.
+  // The graph does not mutate, and RouteCache keys on (start, target, blockedEdges).
+  // This avoids rebuilding graph adjacency lists and re-running Yen's k-shortest paths thousands of times.
+  const sharedCache = new RouteCache(graph);
   const basePlan = mergedOpts.initialPlan
     ? clonePlan(mergedOpts.initialPlan)
-    : nearestFirstBaseline(scenario, graph, baseCache);
-  const baseSimResult = simulate(basePlan, scenario, graph, new RouteCache(graph));
+    : nearestFirstBaseline(scenario, graph, sharedCache);
+  const baseSimResult = simulate(basePlan, scenario, graph, sharedCache);
   const baselineJ = evaluateCost(baseSimResult, scenario, weights);
 
   let globalBestPlan = clonePlan(basePlan);
@@ -118,8 +121,7 @@ export function hillClimb(
         ? clonePlan(basePlan)
         : randomizePlan(basePlan, scenario, rng, locked);
 
-    const restartCache = new RouteCache(graph);
-    let currentResult = simulate(currentPlan, scenario, graph, restartCache);
+    let currentResult = simulate(currentPlan, scenario, graph, sharedCache);
     let currentJ = evaluateCost(currentResult, scenario, weights);
 
     if (currentJ < globalBestJ) {
@@ -142,8 +144,7 @@ export function hillClimb(
       let bestNeighborJ = currentJ;
 
       for (const neighborPlan of neighbors) {
-        const neighborCache = new RouteCache(graph);
-        const neighborResult = simulate(neighborPlan, scenario, graph, neighborCache);
+        const neighborResult = simulate(neighborPlan, scenario, graph, sharedCache);
         const neighborJ = evaluateCost(neighborResult, scenario, weights);
 
         if (neighborJ < bestNeighborJ) {
